@@ -77,6 +77,9 @@ Sysops are identity hashes listed in `/data/apps/config.json`.
   time for node uptime (see `about.mu`).
 - **NEVER** commit real IPs, hostnames, identity hashes or `config.json`;
   use placeholders (see `config.example.json`).
+- **NEVER** put `--` inside an XML comment in `docker/unraid-template.xml` (e.g. a
+  `--build` flag). It makes the XML invalid, and Unraid then silently skips the
+  template: `rebuild_container` does nothing and the UI's Edit page breaks.
 - Pin package versions in `docker/Dockerfile` and check them on OSV.dev
   before bumping.
 
