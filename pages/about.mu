@@ -2,7 +2,7 @@
 """
 About this node.
 
-Version: 1.0
+Version: 1.1
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -12,14 +12,22 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 
 def uptime():
+    """
+    Age of PID 1, i.e. the NomadNet node inside the container. /proc/uptime
+    alone is the host kernel's uptime, since containers share the kernel.
+    """
     try:
         with open("/proc/uptime") as f:
-            seconds = int(float(f.read().split()[0]))
-    except (OSError, ValueError):
+            host_up = float(f.read().split()[0])
+        with open("/proc/1/stat") as f:
+            # starttime is field 22; split after the "(comm)" field, which may contain spaces
+            start_ticks = int(f.read().rsplit(")", 1)[1].split()[19])
+        seconds = int(host_up - start_ticks / os.sysconf("SC_CLK_TCK"))
+    except (OSError, ValueError, IndexError):
         return "unknown"
     days, rem = divmod(seconds, 86400)
     return "{}d {}h {}m".format(days, rem // 3600, rem % 3600 // 60)

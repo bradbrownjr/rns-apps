@@ -9,7 +9,7 @@ micron. The page gets no stdin, and its environment holds only PATH plus:
     field_<name>      submitted form fields
     var_<name>        link variables
 
-Version: 1.0
+Version: 1.1
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -25,7 +25,7 @@ import urllib.request
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 # NomadNet passes no environment beyond PATH, so these defaults are what the
 # container uses. The env overrides exist for running pages locally.

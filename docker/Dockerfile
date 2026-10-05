@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+LABEL org.opencontainers.image.source="https://github.com/bradbrownjr/rns-apps" \
+      org.opencontainers.image.description="BBS-style NomadNet page node for Reticulum" \
+      org.opencontainers.image.licenses="CC0-1.0"
+
 # Pinned and checked against OSV.dev 2026-10-05
 RUN pip install --no-cache-dir nomadnet==1.4.4 rns==1.5.7 lxmf==1.2.0
 

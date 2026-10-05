@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1 - 2026-10-05
+
+- **about** 1.1: uptime now shows the node's own uptime; it was showing the
+  host kernel's, since containers share the kernel.
+- Image published to `ghcr.io/bradbrownjr/rns-apps` (amd64 + arm64) by a
+  GitHub Actions workflow; Unraid template now uses it.
+- **tools/rns_fetch.py**: fetch pages over Reticulum, optionally identified.
+- **tools/node_info.py**: print the node's address and identity.
+
 ## 1.0 - 2026-10-05
 
 Initial release.

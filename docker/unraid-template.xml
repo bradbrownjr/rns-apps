@@ -3,11 +3,12 @@
   Unraid template for rns-apps. Copy to
   /boot/config/plugins/dockerMan/templates-user/my-rns-apps.xml, set
   GATEWAY_HOST to the Reticulum node this one should connect through, and
-  build the image first with: RNS_APPS_HOST=root@your-unraid ./deploy.sh --build
+  sync the app code first with: RNS_APPS_HOST=root@your-unraid ./deploy.sh
 -->
 <Container version="2">
   <Name>rns-apps</Name>
-  <Repository>rns-apps:latest</Repository>
+  <Repository>ghcr.io/bradbrownjr/rns-apps:latest</Repository>
+  <Registry>https://github.com/bradbrownjr/rns-apps/pkgs/container/rns-apps</Registry>
   <Network>bridge</Network>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>

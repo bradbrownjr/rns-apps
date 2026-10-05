@@ -44,9 +44,13 @@ rns-apps runs as a Docker container that connects to an existing Reticulum
 node (for example a transport node with a `BackboneInterface` or
 `TCPServerInterface`) over TCP.
 
+The image is published to GHCR for amd64 and arm64 (Raspberry Pi):
+`ghcr.io/bradbrownjr/rns-apps:latest`. It only contains NomadNet, RNS and the
+entrypoint; the pages are bind-mounted, so you can edit them without a new image.
+
 ```bash
-# Build the image and sync the code to the Docker host
-RNS_APPS_HOST=root@your-unraid ./deploy.sh --build
+# Sync the app code to the Docker host
+RNS_APPS_HOST=root@your-unraid ./deploy.sh
 
 # Run it (or use docker/unraid-template.xml on Unraid)
 docker run -d --name rns-apps --restart unless-stopped \
@@ -54,13 +58,17 @@ docker run -d --name rns-apps --restart unless-stopped \
   -v /mnt/user/appdata/rns-apps/data:/data \
   -e NODE_NAME="Your Callsign BBS" \
   -e GATEWAY_HOST=your-reticulum-node -e GATEWAY_PORT=4242 \
-  rns-apps:latest
+  ghcr.io/bradbrownjr/rns-apps:latest
 ```
 
 Then copy `config.example.json` to `data/apps/config.json`, and set the node
 name and your identity hash as sysop. In MeshChat, your identity hash is shown
-on the identity/settings page. The node's own destination hash, which is what
-you share with others, is in the container log on startup.
+on the identity/settings page. The node's address, the hash you share with
+others, comes from:
+
+```bash
+docker exec rns-apps python3 /opt/rns-apps/tools/node_info.py
+```
 
 Updating pages is just `./deploy.sh`. Code is bind-mounted read-only, so
 changes are live on the next request.
@@ -94,6 +102,13 @@ Test locally the way NomadNet runs it, with only `PATH` and request variables:
 
 ```bash
 env -i PATH="$PATH" RNS_APPS_DATA=/tmp/rnsdata remote_identity=<32 hex> var_p=2 pages/wall.mu
+```
+
+Or fetch it over Reticulum from inside the container, exactly as a visitor would:
+
+```bash
+docker exec rns-apps python3 /opt/rns-apps/tools/rns_fetch.py \
+  --rnsconfig /data/reticulum <node hash> /page/index.mu "/page/space.mu?var_r=wwv"
 ```
 
 See [AGENTS.md](AGENTS.md) for the full conventions.

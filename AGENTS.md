@@ -38,8 +38,10 @@ its stdout as micron. This is request/response, not a terminal session:
 apps.json           Menu registry (categories -> name/description/page; page null = "soon")
 lib/rnsapps.py      Shared helpers: request vars, identity, micron, cache, locking, run()
 pages/*.mu          Executable Python pages (index.mu = home menu)
+tools/              rns_fetch.py (fetch pages over Reticulum), node_info.py (node address)
 docker/             Dockerfile, entrypoint.py (writes configs), Unraid template
-deploy.sh           tar-over-ssh sync to the Docker host, --build rebuilds the image
+.github/workflows/  docker.yml publishes ghcr.io/bradbrownjr/rns-apps (amd64+arm64) on docker/ changes
+deploy.sh           tar-over-ssh sync to the Docker host (--build: local test image only)
 /data (container)   nomadnet/, reticulum/, apps/ (config.json, users.json, wall.json, cache/)
 ```
 
@@ -71,6 +73,8 @@ Sysops are identity hashes listed in `/data/apps/config.json`.
 - **ALWAYS** require `ra.identity()` for anything that writes data, and
   rate-limit per identity.
 - **ALWAYS** keep `VERSION` and the docstring `Version:` in sync per file.
+- Inside a container, `/proc/uptime` is the host's uptime. Use PID 1's start
+  time for node uptime (see `about.mu`).
 - **NEVER** commit real IPs, hostnames, identity hashes or `config.json`;
   use placeholders (see `config.example.json`).
 - Pin package versions in `docker/Dockerfile` and check them on OSV.dev
@@ -83,3 +87,5 @@ Sysops are identity hashes listed in `/data/apps/config.json`.
    `env -i PATH="$PATH" RNS_APPS_DATA=/tmp/rnsdata remote_identity=<hex> var_x=y pages/<page>.mu`
 3. Bump the page's `VERSION`, update `CHANGELOG.md`
 4. Commit, push, `RNS_APPS_HOST=root@<host> ./deploy.sh`
+5. Verify over Reticulum: `docker exec rns-apps python3 /opt/rns-apps/tools/rns_fetch.py --rnsconfig /data/reticulum <node hash> /page/<page>.mu`
+6. Changes under `docker/` publish a new image via Actions; then pull and recreate the container
