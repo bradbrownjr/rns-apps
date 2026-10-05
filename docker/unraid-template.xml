@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+  Unraid template for rns-apps. Copy to
+  /boot/config/plugins/dockerMan/templates-user/my-rns-apps.xml, set
+  GATEWAY_HOST to the Reticulum node this one should connect through, and
+  build the image first with: RNS_APPS_HOST=root@your-unraid ./deploy.sh --build
+-->
+<Container version="2">
+  <Name>rns-apps</Name>
+  <Repository>rns-apps:latest</Repository>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Project>https://github.com/bradbrownjr/rns-apps</Project>
+  <Overview>BBS-style NomadNet page node for Reticulum: amateur radio and emcomm apps.</Overview>
+  <Category>Network:Other</Category>
+  <WebUI/>
+  <Config Name="App code" Target="/opt/rns-apps" Default="/mnt/user/appdata/rns-apps/app" Mode="ro" Description="pages/, lib/, apps.json (synced by deploy.sh)" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/rns-apps/app</Config>
+  <Config Name="Data" Target="/data" Default="/mnt/user/appdata/rns-apps/data" Mode="rw" Description="Identity, configs, wall, caches" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/rns-apps/data</Config>
+  <Config Name="Node name" Target="NODE_NAME" Default="rns-apps" Mode="" Description="Name announced to the network" Type="Variable" Display="always" Required="true" Mask="false">rns-apps</Config>
+  <Config Name="Gateway host" Target="GATEWAY_HOST" Default="" Mode="" Description="Reticulum TCP/Backbone interface to connect through" Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Gateway port" Target="GATEWAY_PORT" Default="4242" Mode="" Description="" Type="Variable" Display="always" Required="true" Mask="false">4242</Config>
+</Container>

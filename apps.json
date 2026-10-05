@@ -1,0 +1,31 @@
+{
+  "categories": {
+    "Main": [
+      {"name": "WALL", "description": "Leave your mark!", "page": "wall"},
+      {"name": "REGISTER", "description": "Set your callsign", "page": "register"},
+      {"name": "CALENDAR", "description": "Event calendar", "page": null},
+      {"name": "FORMS", "description": "Message forms", "page": null}
+    ],
+    "Weather": [
+      {"name": "SPACE", "description": "Space weather", "page": "space"},
+      {"name": "WX-ME", "description": "ME/NH weather", "page": "wx-me"},
+      {"name": "WX", "description": "Weather reports", "page": null}
+    ],
+    "Reference": [
+      {"name": "HAMQSL", "description": "Band conditions", "page": "hamqsl"},
+      {"name": "DICT", "description": "Dictionary", "page": null},
+      {"name": "QRZ", "description": "Callsign lookup", "page": null},
+      {"name": "REPEATER", "description": "Repeater search", "page": null}
+    ],
+    "Browsers": [
+      {"name": "NEWS", "description": "News feeds", "page": null},
+      {"name": "WIKI", "description": "Wikipedia browser", "page": null},
+      {"name": "GOPHER", "description": "Gopher browser", "page": null}
+    ],
+    "Tools": [
+      {"name": "ANTENNA", "description": "Antenna calculator", "page": null},
+      {"name": "HAMTEST", "description": "Exam practice", "page": null},
+      {"name": "PREDICT", "description": "QSO planning", "page": null}
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+**/__pycache__
+*.pyc
+*.swp
+*.bak
+*.log
+
+# Runtime data (wall posts, users, caches, local config)
+data/
+config.json
