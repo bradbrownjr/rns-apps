@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3 - 2026-10-06
+
+Most visitors won't be hams, and many want to stay anonymous.
+
+- **register** 1.1: pick a **handle** (required, the only public field).
+  Name, callsign and location are optional and visible to sysops only.
+  Handles are unique (case-insensitive). "Remove my registration" added.
+- **lib** 1.2: `profile()`, `handle_for()`, `save_profile()`, `clear_profile()`;
+  `callsign_for()` now returns the optional callsign, or None (apps that need
+  one should ask for it).
+- **wall** 1.1: posts are labeled with the handle.
+- **index** 1.2: logo drawn with `#` (the "_" art rendered broken on phones);
+  Register appears once (the welcome line, which links to your profile when
+  registered); About moved into Main.
+
 ## 1.2 - 2026-10-06
 
 - **index** 1.1: mobile-friendly. Smaller "Apps" logo, shorter welcome lines,

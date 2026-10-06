@@ -2,7 +2,7 @@
   "categories": {
     "Main": [
       {"name": "WALL", "description": "Leave your mark!", "page": "wall"},
-      {"name": "REGISTER", "description": "Set your callsign", "page": "register"},
+      {"name": "ABOUT", "description": "About this node", "page": "about"},
       {"name": "CALENDAR", "description": "Event calendar", "page": null},
       {"name": "FORMS", "description": "Message forms", "page": null}
     ],

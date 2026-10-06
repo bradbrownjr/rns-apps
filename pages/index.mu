@@ -2,7 +2,7 @@
 """
 rns-apps home page: categorized app menu (port of bpq-apps apps.py).
 
-Version: 1.1
+Version: 1.2
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -12,27 +12,26 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 LOGO = r"""
-    _
-   / \  _ __  _ __  ___
-  / _ \| '_ \| '_ \/ __|
- / ___ \ |_) | |_) \__ \
-/_/   \_\ .__/| .__/|___/
-        |_|   |_|
+ ###  ####  ####   ####
+#   # #   # #   # #
+##### ####  ####   ###
+#   # #     #         #
+#   # #     #     ####
 """
 
 
 def welcome(ident):
     """Short lines: phone screens only fit about 36 columns."""
-    now = ra.utc_now().strftime("%H:%M")
-    call = ra.callsign_for(ident)
-    if call:
-        return "Welcome {}\n{}".format(ra.bold(call), ra.dim("{} UTC".format(now)))
+    now = ra.dim("{} UTC".format(ra.utc_now().strftime("%H:%M")))
+    handle = ra.handle_for(ident)
+    if handle:
+        return "Welcome {}  {}".format(ra.link(handle, "register"), now)
     if ident:
-        return "Welcome! {}\n{} to set your callsign".format(ra.dim("{} UTC".format(now)), ra.link("Register", "register"))
-    return "Welcome, guest. {}\n{}".format(ra.dim("{} UTC".format(now)), ra.dim("Identify to post and register."))
+        return "Welcome! {}\n{} to pick a handle".format(now, ra.link("Register", "register"))
+    return "Welcome, guest. {}\n{}".format(now, ra.dim("Identify to post and register."))
 
 
 def render():
@@ -59,13 +58,8 @@ def render():
             else:
                 out.append(ra.dim("{}{}{}".format(app["name"], pad, app["description"])))
 
-    out += ["", "<", ra.divider()]
-    footer = [ra.link("About", "about")]
-    if ident:
-        footer.append(ra.link("Register", "register"))
     if ra.is_sysop(ident):
-        footer.append(ra.color("[sysop]", ra.C_OK))
-    out.append("  ".join(footer))
+        out += ["", "<", ra.divider(), ra.color("[sysop]", ra.C_OK)]
     return "\n".join(out)
 
 

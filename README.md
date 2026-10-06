@@ -8,14 +8,14 @@ browser.
 Sister project of [bpq-apps](https://github.com/bradbrownjr/bpq-apps), which
 serves the same apps to packet radio users over a BPQ node. rns-apps ports them
 to NomadNet's page model, using the visitor's Reticulum identity in place of a
-callsign login.
+login.
 
 ## Apps
 
 | App | Page | Description |
 |-----|------|-------------|
 | Menu | `index.mu` | Categorized app menu, the node's home page |
-| REGISTER | `register.mu` | Link your Reticulum identity to your callsign |
+| Register | `register.mu` | Pick a handle; optional name, callsign, location |
 | WALL | `wall.mu` | Community one-liners: post, read, delete your own |
 | HAMQSL | `hamqsl.mu` | Solar data and HF/VHF band conditions (hamqsl.com) |
 | SPACE | `space.mu` | NOAA SWPC space weather reports |
@@ -32,7 +32,8 @@ and serves the cached copy, clearly marked, when the source is unreachable.
 Reticulum has no logins. When a visitor chooses to **identify** to the node,
 pages receive their public identity hash. rns-apps uses that to:
 
-- let them register a callsign once (self-reported, not verified),
+- let them register a handle once, with optional name, callsign and location
+  (self-reported, not verified; only the handle is public),
 - attribute wall posts and allow deleting their own,
 - recognize sysops (identity hashes listed in `config.json`).
 

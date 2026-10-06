@@ -2,7 +2,7 @@
 """
 About this node.
 
-Version: 1.1
+Version: 1.2
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 
 def uptime():
@@ -45,8 +45,8 @@ def render():
         ra.heading("Features", 2),
         "* Offline-first: data is cached on the node and served even when",
         "  the internet is down.",
-        "* Identity instead of login: identify to this node and register your",
-        "  callsign once.",
+        "* Identity instead of login: identify to this node and pick a handle.",
+        "  Name, callsign and location are optional.",
         "* Small pages for slow links: LoRa, packet and other low-bandwidth",
         "  Reticulum interfaces.",
         "",

@@ -5,7 +5,7 @@ Community wall: one-line messages (port of bpq-apps wall.py).
 Posting needs an identified visitor. Authors can delete their own posts and
 sysops can delete any post.
 
-Version: 1.0
+Version: 1.1
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -17,7 +17,7 @@ import uuid
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.0"
+VERSION = "1.1"
 WALL_FILE = "wall.json"
 MAX_LEN = 200
 MAX_POSTS = 500
@@ -49,7 +49,7 @@ def post(ident, text):
         msgs.append({
             "id": uuid.uuid4().hex[:8],
             "identity": ident,
-            "callsign": ra.display_name(ident),
+            "handle": ra.display_name(ident),
             "message": text,
             "timestamp": ra.utc_iso(),
             "epoch": time.time(),
@@ -106,7 +106,7 @@ def render():
     for m in msgs[(page - 1) * PER_PAGE:page * PER_PAGE]:
         line = "{} {}: {}".format(
             ra.dim("[{}]".format(ra.fmt_ts(m.get("timestamp")))),
-            ra.color(m.get("callsign", "?"), ra.C_HEAD),
+            ra.color(m.get("handle") or m.get("callsign", "?"), ra.C_HEAD),
             ra.esc(m.get("message", "")),
         )
         if ident and (m.get("identity") == ident or sysop):

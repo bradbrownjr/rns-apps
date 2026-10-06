@@ -9,7 +9,7 @@ micron. The page gets no stdin, and its environment holds only PATH plus:
     field_<name>      submitted form fields
     var_<name>        link variables
 
-Version: 1.1
+Version: 1.2
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -25,7 +25,7 @@ import urllib.request
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 # NomadNet passes no environment beyond PATH, so these defaults are what the
 # container uses. The env overrides exist for running pages locally.
@@ -36,6 +36,7 @@ CACHE_DIR = os.path.join(DATA_DIR, "cache")
 HTTP_TIMEOUT = 8
 USER_AGENT = "rns-apps/{} (+https://github.com/bradbrownjr/rns-apps)".format(VERSION)
 CALLSIGN_RE = re.compile(r"^[A-Z]{1,2}\d[A-Z]{1,3}$")
+HANDLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{1,19}$")
 
 # Micron colors
 C_HEAD = "fd8"
@@ -193,17 +194,54 @@ def users():
     return load_json(data_path("users.json"), {})
 
 
+def profile(ident):
+    """Registered profile dict (handle, and optional name/callsign/location), or {}."""
+    return users().get(ident, {}) if ident else {}
+
+
+def handle_for(ident):
+    return profile(ident).get("handle")
+
+
 def callsign_for(ident):
-    if not ident:
-        return None
-    return users().get(ident, {}).get("callsign")
+    """Optional amateur callsign. Apps that need one should ask when this is None."""
+    return profile(ident).get("callsign") or None
 
 
-def set_callsign(ident, callsign):
+def save_profile(ident, handle, name="", callsign="", location=""):
+    """
+    Validate and store a profile. Only the handle is required and public;
+    name, callsign and location are optional and visible to sysops only.
+    Returns (ok, message).
+    """
+    handle, name, location = handle.strip(), " ".join(name.split()), " ".join(location.split())
+    callsign = callsign.strip().upper()
+    if not HANDLE_RE.match(handle):
+        return False, "Handle must be 2-20 letters, digits, '_', '.' or '-'."
+    if callsign and not CALLSIGN_RE.match(callsign):
+        return False, "'{}' doesn't look like a callsign (no SSID). Leave it blank if you have none.".format(callsign)
+    if len(name) > 40 or len(location) > 40:
+        return False, "Name and location are limited to 40 characters."
     with locked("users"):
         data = users()
-        data[ident] = {"callsign": callsign, "registered": utc_iso()}
+        for other, rec in data.items():
+            if other != ident and rec.get("handle", "").lower() == handle.lower():
+                return False, "Handle '{}' is already taken.".format(handle)
+        rec = data.get(ident, {})
+        rec.update({"handle": handle, "name": name, "callsign": callsign, "location": location,
+                    "updated": utc_iso()})
+        rec.setdefault("registered", rec["updated"])
+        data[ident] = rec
         save_json(data_path("users.json"), data)
+    return True, "Saved."
+
+
+def clear_profile(ident):
+    with locked("users"):
+        data = users()
+        removed = data.pop(ident, None) is not None
+        save_json(data_path("users.json"), data)
+    return removed
 
 
 def is_sysop(ident):
@@ -211,10 +249,10 @@ def is_sysop(ident):
 
 
 def display_name(ident):
-    """Callsign if registered, else a short identity tag."""
-    call = callsign_for(ident)
-    if call:
-        return call
+    """Handle if registered, else a short identity tag."""
+    handle = handle_for(ident)
+    if handle:
+        return handle
     return "<{}>".format(ident[:8]) if ident else "guest"
 
 

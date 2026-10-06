@@ -46,7 +46,10 @@ deploy.sh           tar-over-ssh sync to the Docker host (--build: local test im
 ```
 
 Identity replaces the BPQ callsign: `remote_identity` is the key,
-`users.json` maps it to a self-reported callsign (register page).
+`users.json` maps it to a self-reported profile (register page): `handle`
+(required, public) plus optional `name`, `callsign`, `location` (sysop-visible
+only). Most visitors are not hams, so never require a callsign to use an app;
+use `ra.callsign_for(ident)` and ask for one when an app needs it.
 Sysops are identity hashes listed in `/data/apps/config.json`.
 
 ---
@@ -75,6 +78,7 @@ Sysops are identity hashes listed in `/data/apps/config.json`.
 - **ALWAYS** keep `VERSION` and the docstring `Version:` in sync per file.
 - Inside a container, `/proc/uptime` is the host's uptime. Use PID 1's start
   time for node uptime (see `about.mu`).
+- **NEVER** draw logos or banners with `_` (renders broken on mobile page browsers); use `#`.
 - **NEVER** commit real IPs, hostnames, identity hashes or `config.json`;
   use placeholders (see `config.example.json`).
 - **NEVER** put `--` inside an XML comment in `docker/unraid-template.xml` (e.g. a
