@@ -76,6 +76,11 @@
         "name": "GOPHER",
         "description": "Gopher browser",
         "page": "gopher"
+      },
+      {
+        "name": "WWW",
+        "description": "Text web browser",
+        "page": "www"
       }
     ],
     "Tools": [

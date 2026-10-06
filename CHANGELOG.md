@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9 - 2026-10-06
+
+- **www** 1.0: text web browser (port of bpq-apps www.py): URL or search words
+  (FrogFind, falling back to DuckDuckGo lite), links followable, gopher:// links
+  open GOPHER. Public hosts only, redirects checked, 500 KB cap.
+- **lib** `htmltext.to_micron()`: HTML to micron with inline links.
+
 ## 1.8 - 2026-10-06
 
 - **qrz** 1.1: uses the QRZ.com XML API (all countries) when `qrz_user` and
