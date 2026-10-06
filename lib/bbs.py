@@ -9,11 +9,12 @@ Identity (the verified remote_identity hash) is the key for everything;
 handles are display names looked up from users.json at render time, so a
 renamed handle shows everywhere. Sysops are recognized by identity only.
 
-Version: 1.0
+Version: 1.1
 Author: Brad Brown Jr (KC1JMH)
 """
 
 import json
+import os
 import re
 import sqlite3
 import time
@@ -21,7 +22,7 @@ from contextlib import contextmanager
 
 import rnsapps as ra
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 POST_INTERVAL = 30       # seconds between posts/mails per identity
 MAX_POST = 1500          # characters of the author's own text per post
@@ -65,6 +66,19 @@ MIGRATIONS = [
     CREATE TABLE mutes (identity TEXT PRIMARY KEY, reason TEXT, created INTEGER);
     INSERT INTO boards (name, description, sort, created)
         VALUES ('General', 'Anything goes. Be kind.', 10, strftime('%s','now'));
+    """,
+    """
+    CREATE TABLE file_areas (
+        id INTEGER PRIMARY KEY, parent_id INTEGER REFERENCES file_areas(id), name TEXT NOT NULL,
+        description TEXT DEFAULT '', sort INTEGER DEFAULT 100, hidden INTEGER DEFAULT 0);
+    CREATE TABLE files (
+        id INTEGER PRIMARY KEY, area_id INTEGER NOT NULL REFERENCES file_areas(id), fname TEXT NOT NULL,
+        title TEXT NOT NULL, description TEXT DEFAULT '', size INTEGER, sha256 TEXT, uploader TEXT,
+        scan TEXT DEFAULT '', created INTEGER);
+    CREATE INDEX files_area ON files(area_id, created DESC);
+    CREATE TABLE uploads (
+        id INTEGER PRIMARY KEY, fname TEXT NOT NULL, orig_name TEXT, size INTEGER, sha256 TEXT,
+        sender TEXT, note TEXT DEFAULT '', created INTEGER, status TEXT DEFAULT 'pending', scan TEXT DEFAULT '');
     """,
 ]
 
@@ -346,6 +360,63 @@ def delete_post(conn, ident, post_id):
     return True, "Deleted."
 
 
+# ------------------------------------------------------------------- files ---
+
+def area_tree(conn, include_hidden=False):
+    """[(area row, depth)] depth-first, siblings by sort order."""
+    rows = conn.execute("SELECT * FROM file_areas WHERE hidden=0 OR ?=1 ORDER BY sort, id", (1 if include_hidden else 0,)).fetchall()
+    kids = {}
+    for r in rows:
+        kids.setdefault(r["parent_id"], []).append(r)
+    out = []
+
+    def walk(parent, depth):
+        for r in kids.get(parent, []):
+            out.append((r, depth))
+            walk(r["id"], depth + 1)
+    walk(None, 0)
+    return out
+
+
+def area_path(conn, area_id):
+    """[(id, name)] from the top-level area down to area_id."""
+    path = []
+    while area_id:
+        row = conn.execute("SELECT id, parent_id, name FROM file_areas WHERE id=?", (area_id,)).fetchone()
+        if not row:
+            break
+        path.append((row["id"], row["name"]))
+        area_id = row["parent_id"]
+    return path[::-1]
+
+
+def area_file_count(conn, area_id):
+    """Files in this area and everything below it."""
+    ids, todo = [], [area_id]
+    while todo:
+        cur = todo.pop()
+        ids.append(cur)
+        todo += [r["id"] for r in conn.execute("SELECT id FROM file_areas WHERE parent_id=?", (cur,))]
+    return conn.execute("SELECT COUNT(*) FROM files WHERE area_id IN ({})".format(",".join("?" * len(ids))), ids).fetchone()[0]
+
+
+def human_size(n):
+    n = float(n or 0)
+    for unit in ("B", "KB", "MB", "GB"):
+        if n < 1024 or unit == "GB":
+            return "{:.0f} {}".format(n, unit) if unit == "B" else "{:.1f} {}".format(n, unit)
+        n /= 1024
+
+
+def safe_filename(name):
+    """A file name that is safe on disk and in a NomadNet path."""
+    name = re.sub(r"[^A-Za-z0-9._() +-]", "_", os.path.basename(name or "")).strip(" .")[:80]
+    name = name.replace(" ", "_") or "file"
+    if name.lower().endswith(".allowed"):
+        name += ".file"
+    return name
+
+
 # -------------------------------------------------------------------- mail ---
 
 def mail_unread(conn, ident):
@@ -395,3 +466,55 @@ def delete_mail(conn, ident, mail_id):
         # purge once both sides have deleted
         conn.execute("DELETE FROM mail WHERE id=? AND del_sender=1 AND del_recipient=1", (mail_id,))
     return True
+
+
+# --------------------------------------------------------------- file paths ---
+
+def files_root():
+    """Root of the file store: public/ (served by NomadNet), incoming/ (sysop
+    drop box), pending/ (uploads awaiting approval)."""
+    return os.environ.get("RNS_APPS_FILES") or ra.config().get("files_dir") or os.path.join(os.path.dirname(ra.DATA_DIR.rstrip("/")), "files")
+
+
+def files_dir(kind):
+    path = os.path.join(files_root(), kind)
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def publish_file(conn, area_id, src, fname, title, description="", uploader="", scan=""):
+    """Move src into the public store under the area and record it.
+    Returns (ok, message). The file name is made unique within the area."""
+    import hashlib
+    import shutil
+    if not conn.execute("SELECT 1 FROM file_areas WHERE id=?", (area_id,)).fetchone():
+        return False, "No such area."
+    dest_dir = os.path.join(files_dir("public"), "a{}".format(int(area_id)))
+    os.makedirs(dest_dir, exist_ok=True)
+    fname = safe_filename(fname)
+    stem, ext = os.path.splitext(fname)
+    n = 1
+    while os.path.exists(os.path.join(dest_dir, fname)):
+        n += 1
+        fname = "{}-{}{}".format(stem, n, ext)
+    digest = hashlib.sha256()
+    with open(src, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            digest.update(chunk)
+    size = os.path.getsize(src)
+    shutil.move(src, os.path.join(dest_dir, fname))
+    with tx(conn):
+        conn.execute("INSERT INTO files (area_id, fname, title, description, size, sha256, uploader, scan, created) VALUES (?,?,?,?,?,?,?,?,?)",
+                     (area_id, fname, (title or fname)[:80], (description or "")[:300], size, digest.hexdigest(), uploader, scan, now()))
+    return True, "Added {}.".format(fname)
+
+
+def remove_file(conn, file_id):
+    row = conn.execute("SELECT * FROM files WHERE id=?", (file_id,)).fetchone()
+    if not row:
+        return
+    path = os.path.join(files_dir("public"), "a{}".format(row["area_id"]), row["fname"])
+    if os.path.exists(path):
+        os.remove(path)
+    with tx(conn):
+        conn.execute("DELETE FROM files WHERE id=?", (file_id,))

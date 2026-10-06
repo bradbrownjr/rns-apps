@@ -117,6 +117,15 @@ def input_field(name, width=40, value=""):
     return "`B333`<{}|{}`{}>`b".format(width, name, esc(value))
 
 
+def quote(value):
+    """Percent-encode a value for a link variable (no | ` = or spaces survive)."""
+    return urllib.parse.quote(str(value), safe="")
+
+
+def unquote(value):
+    return urllib.parse.unquote(str(value))
+
+
 def dim(text):
     return "`F{}{}`f".format(C_DIM, esc(text))
 

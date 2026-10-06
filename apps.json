@@ -17,6 +17,11 @@
         "page": "mail"
       },
       {
+        "name": "FILES",
+        "description": "File downloads",
+        "page": "files"
+      },
+      {
         "name": "ABOUT",
         "description": "About this node",
         "page": "about"

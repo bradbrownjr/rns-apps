@@ -27,6 +27,7 @@ NOMAD_DIR = "/data/nomadnet"
 RNS_DIR = "/data/reticulum"
 APPS_DATA = "/data/apps"
 PAGES = "/opt/rns-apps/pages"
+FILES_PUBLIC = "/data/files/public"
 
 RNS_CONFIG = """# Reticulum config for the rns-apps container (written by entrypoint).
 # Edit freely; it is only generated when missing.
@@ -82,6 +83,8 @@ def write_nomad_config():
     node["announce_interval"] = env("ANNOUNCE_INTERVAL", "360")
     node["announce_at_start"] = "yes"
     node["pages_path"] = PAGES
+    node["files_path"] = FILES_PUBLIC
+    node["file_refresh_interval"] = env("FILE_REFRESH_INTERVAL", "5")
     node["page_refresh_interval"] = env("PAGE_REFRESH_INTERVAL", "5")
     node["disable_propagation"] = "yes"
     cfg.write()
@@ -99,6 +102,8 @@ def start_form_sender():
 
 def main():
     os.makedirs(APPS_DATA, exist_ok=True)
+    for sub in ("public", "incoming", "pending"):
+        os.makedirs("/data/files/" + sub, exist_ok=True)
     write_rns_config()
     write_nomad_config()
     start_form_sender()
