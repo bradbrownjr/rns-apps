@@ -2,7 +2,7 @@
 """
 rns-apps home page: categorized app menu (port of bpq-apps apps.py).
 
-Version: 1.3
+Version: 1.4
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.3"
+VERSION = "1.4"
 
 # Left-aligned and pre-indented: centering (`c) would center every line of the
 # block on its own and shear the art.
@@ -21,7 +21,7 @@ LOGO = r"""
     / \  _ __  _ __  ___
    / _ \| '_ \| '_ \/ __|
   / ___ \ |_) | |_) \__ \
- /_/   \_\ .__/| .__/|___/
+ /_/   \_\ .__/| .__/|__/
          |_|   |_|
 """
 
