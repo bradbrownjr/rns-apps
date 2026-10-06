@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.1 - 2026-10-06
+
+Files area and LXMF uploads (steps 3 and 4 of docs/BBS-PLAN.md).
+
+- **files** 1.0: category tree with sub-areas, downloads served by NomadNet
+  (`/file/a<area>/<name>`), size, uploader, SHA-256 prefix, LXMF upload address.
+- **sysop** 1.1: file areas, import from the `incoming` folder, pending-upload
+  queue (approve into an area, reject). Files flagged by the scan can't be approved.
+- **lib/clam.py**: clamd INSTREAM scan, limited to executables and archives
+  (`clamd_scan` = executables | all | off).
+- **lxmf_sender** 1.1: also receives uploads over LXMF from verified, registered,
+  unmuted senders; per-file, daily and queue limits (`upload_max_bytes`,
+  `upload_daily_bytes`, `upload_pending_max`).
+- **rns_fetch**: bare page names work (`files` = `/page/files.mu`); failures print the reason.
+- Image: `files_path` and `file_refresh_interval` set by the entrypoint.
+
 ## 2.0 - 2026-10-06
 
 Message boards and mail (step 1 and 2 of docs/BBS-PLAN.md).

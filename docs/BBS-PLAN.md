@@ -1,6 +1,6 @@
 # Plan: message boards, mail, files
 
-Status: planned, not built. Decisions made 2026-10-06:
+Status: built (boards, mail, files, LXMF uploads); see CHANGELOG. Decisions made 2026-10-06:
 
 - Guests can read boards and download files; a registered handle is needed to
   post, send mail, or upload.

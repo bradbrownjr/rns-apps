@@ -71,6 +71,8 @@ def main():
     failed = False
     for spec in args.pages:
         path, _, query = spec.partition("?")
+        if not path.startswith("/"):
+            path = "/page/{}{}".format(path, "" if path.endswith(".mu") else ".mu")
         data = {}
         for pair in filter(None, query.split("&")):
             key, _, value = pair.partition("=")
@@ -82,7 +84,7 @@ def main():
                      failed_callback=lambda r: result.setdefault("fail", r.status))
         wait(lambda: result, args.timeout)
         body = result.get("ok")
-        print("=== {} ({:.2f}s{})".format(spec, time.time() - started, "" if body else ", FAILED"))
+        print("=== {} ({:.2f}s{})".format(spec, time.time() - started, "" if body else ", FAILED: {}".format(result.get("fail", "timeout"))))
         if body:
             print(body.decode("utf-8", "replace") if isinstance(body, bytes) else body)
         else:
