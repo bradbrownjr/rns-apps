@@ -6,6 +6,8 @@
   `qrz_password` are set in `config.json`; falls back to HamDB. Session key
   cached, password never logged.
 - **news**: Maine Packet Network feed restored at `/feed` (the site moved CMS).
+- **tools/announce.py**: re-announce the node now, for clients that show
+  "Unknown Node" because they missed the last announce (every 6 h).
 - FORMS LXMF delivery stays dormant until `forms_deliver_to` is configured.
 
 ## 1.7 - 2026-10-06
