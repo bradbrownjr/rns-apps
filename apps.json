@@ -14,7 +14,7 @@
       {
         "name": "CALENDAR",
         "description": "Event calendar",
-        "page": null
+        "page": "calendar"
       },
       {
         "name": "FORMS",
@@ -65,12 +65,12 @@
       {
         "name": "NEWS",
         "description": "News feeds",
-        "page": null
+        "page": "news"
       },
       {
         "name": "WIKI",
         "description": "Wikipedia browser",
-        "page": null
+        "page": "wiki"
       },
       {
         "name": "GOPHER",

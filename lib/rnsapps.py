@@ -9,7 +9,7 @@ micron. The page gets no stdin, and its environment holds only PATH plus:
     field_<name>      submitted form fields
     var_<name>        link variables
 
-Version: 1.3
+Version: 1.5
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -27,7 +27,7 @@ import urllib.request
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = "1.3"
+VERSION = "1.5"
 
 # NomadNet passes no environment beyond PATH, so these defaults are what the
 # container uses. The env overrides exist for running pages locally.
@@ -82,6 +82,11 @@ def esc(text):
     """Escape untrusted text for inline micron. Newlines become spaces."""
     text = str(text).replace("\r", " ").replace("\n", " ")
     return text.replace("\\", "\\\\").replace("`", "\\`")
+
+
+def paragraphs(text):
+    """Escape multi-line text for micron, keeping its line breaks."""
+    return [esc(line) if line.strip() else "" for line in str(text).replace("\r", "").split("\n")]
 
 
 def literal(text):
@@ -326,6 +331,13 @@ def cached(key, ttl, fetch):
         if entry:
             return entry["data"], entry["ts"], True
         return None, None, True
+
+
+def cache_peek(key):
+    """(data, ts) from the cache regardless of age, or (None, None). Never fetches."""
+    path = os.path.join(CACHE_DIR, re.sub(r"[^A-Za-z0-9_.-]", "_", key) + ".json")
+    entry = load_json(path, None)
+    return (entry["data"], entry["ts"]) if entry else (None, None)
 
 
 def freshness(ts, stale):

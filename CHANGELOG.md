@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5 - 2026-10-06
+
+Ports from bpq-apps, batch 2 (feeds).
+
+- **calendar** 1.0: events from a public iCal feed with recurrence rules
+  (`lib/ical.py`), detail view, paging. Needs `ical_url` in `config.json`.
+- **news** 1.0: RSS and Atom feeds from `feeds.json`, 30 min cache, summaries,
+  optional readable full article. Dropped three bpq-apps feeds that no longer
+  work (Maine Packet Radio, Space.com, NWS alerts atom).
+- **wiki** 1.0: Wikipedia, Simple English, Wiktionary, Wikiquote, Wikinews and
+  Wikivoyage: search, read in pages, related articles, random.
+- **lib** 1.5: `htmltext.py` (HTML to text), `paragraphs()`, `cache_peek()`.
+
 ## 1.4 - 2026-10-06
 
 Ports from bpq-apps, batch 1 (reference lookups).

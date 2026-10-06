@@ -3,5 +3,7 @@
   "sysops": [
     "0123456789abcdef0123456789abcdef"
   ],
-  "repeaterbook_token": ""
+  "repeaterbook_token": "",
+  "ical_url": "https://calendar.google.com/calendar/ical/<id>/public/basic.ics",
+  "timezone": "America/New_York"
 }

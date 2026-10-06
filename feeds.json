@@ -1,0 +1,106 @@
+{
+  "categories": {
+    "Ham Radio": [
+      {
+        "name": "Amateur Radio Newsline",
+        "url": "https://www.arnewsline.org/?format=rss"
+      },
+      {
+        "name": "ARRL New England Division News",
+        "url": "https://nediv.arrl.org/feed/"
+      },
+      {
+        "name": "ARRL News",
+        "url": "http://www.arrl.org/news/rss"
+      },
+      {
+        "name": "AMSAT",
+        "url": "https://www.amsat.org/feed/"
+      },
+      {
+        "name": "On All Bands",
+        "url": "https://feeds.feedburner.com/OnAllBands"
+      },
+      {
+        "name": "QRPer",
+        "url": "https://qrper.com/feed/"
+      },
+      {
+        "name": "SWLing",
+        "url": "https://swling.com/blog/feed/"
+      },
+      {
+        "name": "Wireless Society of Southern Maine Blog",
+        "url": "https://blogws1sm.wordpress.com/feed/"
+      }
+    ],
+    "News": [
+      {
+        "name": "Associated Press Top Stories",
+        "url": "https://feedx.net/rss/ap.xml"
+      },
+      {
+        "name": "BBC World",
+        "url": "http://feeds.bbci.co.uk/news/world/rss.xml"
+      },
+      {
+        "name": "CNN Top Stories",
+        "url": "http://rss.cnn.com/rss/cnn_topstories.rss"
+      },
+      {
+        "name": "NPR News",
+        "url": "https://feeds.npr.org/1001/rss.xml"
+      }
+    ],
+    "Science": [
+      {
+        "name": "NASA Breaking News",
+        "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss"
+      },
+      {
+        "name": "Science Daily",
+        "url": "https://www.sciencedaily.com/rss/all.xml"
+      }
+    ],
+    "Technology": [
+      {
+        "name": "Ars Technica",
+        "url": "https://feeds.arstechnica.com/arstechnica/index"
+      },
+      {
+        "name": "Hacker News",
+        "url": "https://news.ycombinator.com/rss"
+      },
+      {
+        "name": "The Verge",
+        "url": "https://www.theverge.com/rss/index.xml"
+      },
+      {
+        "name": "Wired Top Stories",
+        "url": "https://www.wired.com/feed/rss"
+      }
+    ],
+    "Weather": [
+      {
+        "name": "NHC Atlantic Tropical Weather Outlook",
+        "url": "https://www.nhc.noaa.gov/xml/TWOAT.xml"
+      },
+      {
+        "name": "NHC Tropical Weather Discussion",
+        "url": "https://www.nhc.noaa.gov/xml/TWDAT.xml"
+      },
+      {
+        "name": "Storm Prediction Center",
+        "url": "https://www.spc.noaa.gov/products/spcrss.xml"
+      },
+      {
+        "name": "USGS Most recent Earthquakes",
+        "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.atom"
+      },
+      {
+        "name": "USGS Significant Earthquakes - 30 Days",
+        "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.atom"
+      }
+    ]
+  }
+}

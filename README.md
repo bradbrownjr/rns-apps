@@ -24,6 +24,9 @@ login.
 | DICT | `dict.mu` | Dictionary (dict.org: WordNet, GCIDE, ...) |
 | WX | `wx.mu` | NWS weather for any US place: conditions, forecast, alerts, AFD, HWO |
 | REPEATER | `repeater.mu` | RepeaterBook search by state or near a ZIP/grid/callsign (needs `repeaterbook_token`) |
+| CALENDAR | `calendar.mu` | Club events from a public iCal feed (`ical_url`) |
+| NEWS | `news.mu` | RSS/Atom headlines from `feeds.json`, summaries, readable full articles |
+| WIKI | `wiki.mu` | Wikipedia and sister projects: search, read, random |
 | About | `about.mu` | Node info |
 
 More bpq-apps are listed greyed-out on the menu and will be ported over time.

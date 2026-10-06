@@ -127,7 +127,8 @@ def render():
         return "\n".join(out + [ra.color("Location lookup failed. Try a state name.", ra.C_WARN), ra.nav()])
 
     if not token:
-        data, ts, stale = ra.cached("rb_" + abbr, TTL, lambda: (_ for _ in ()).throw(RuntimeError("no token")))
+        data, ts = ra.cache_peek("rb_" + abbr)
+        stale = True
     else:
         data, ts, stale = ra.cached("rb_" + abbr, TTL, lambda: fetch_state(STATES[abbr], token))
     if not data:
