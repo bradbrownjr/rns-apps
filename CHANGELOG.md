@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.6 - 2026-10-06
+
+Ports from bpq-apps, batch 3 (tools).
+
+- **antenna** 1.1: calculators (dipole, EFHW, OCF, folded, Moxon, vertical,
+  NVIS, loops, random wire), US band plan, formulas, popular antennas, and a
+  shared antenna database (identified visitors add entries, authors/sysops
+  delete). The Moxon calculator uses the published MoxGen equations (Cebik);
+  the bpq-apps version used wrong coefficients.
+- **hamtest** 1.0: practice and full-length exams from the NCVEC pools
+  (`data/question_pools/`), stateless (seed and answers travel in link
+  variables), best scores per identified visitor.
+- **predict** 1.0: HF propagation estimate (`lib/geo.py`, `lib/ionosphere.py`,
+  `data/regions.json` from bpq-apps), hamqsl.com solar data, time-shift links.
+
 ## 1.5 - 2026-10-06
 
 Ports from bpq-apps, batch 2 (feeds).

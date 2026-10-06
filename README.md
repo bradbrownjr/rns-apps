@@ -27,6 +27,9 @@ login.
 | CALENDAR | `calendar.mu` | Club events from a public iCal feed (`ical_url`) |
 | NEWS | `news.mu` | RSS/Atom headlines from `feeds.json`, summaries, readable full articles |
 | WIKI | `wiki.mu` | Wikipedia and sister projects: search, read, random |
+| ANTENNA | `antenna.mu` | Antenna calculators, US band plan, formulas, shared antenna database |
+| HAMTEST | `hamtest.mu` | Practice license exams (Technician, General, Extra) with the NCVEC question pools |
+| PREDICT | `predict.mu` | HF band and hour estimates between any two places, from live solar data |
 | About | `about.mu` | Node info |
 
 More bpq-apps are listed greyed-out on the menu and will be ported over time.

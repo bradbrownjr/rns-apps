@@ -82,17 +82,17 @@
       {
         "name": "ANTENNA",
         "description": "Antenna calculator",
-        "page": null
+        "page": "antenna"
       },
       {
         "name": "HAMTEST",
         "description": "Exam practice",
-        "page": null
+        "page": "hamtest"
       },
       {
         "name": "PREDICT",
         "description": "QSO planning",
-        "page": null
+        "page": "predict"
       }
     ]
   }

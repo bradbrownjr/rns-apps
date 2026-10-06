@@ -25,7 +25,7 @@ python3 -c "import json; json.load(open('apps.json'))"
 find . -name __pycache__ -prune -exec rm -rf {} +
 
 ssh "$HOST" "mkdir -p '$DEST' && find '$DEST' -mindepth 1 -delete"
-tar -czf - pages lib tools apps.json docker | ssh "$HOST" "tar -xzf - -C '$DEST'"
+tar -czf - pages lib tools data apps.json feeds.json docker | ssh "$HOST" "tar -xzf - -C '$DEST'"
 echo "Synced to $HOST:$DEST"
 
 if [[ "${1:-}" == "--build" ]]; then

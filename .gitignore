@@ -5,5 +5,5 @@
 *.log
 
 # Runtime data (wall posts, users, caches, local config)
-data/
+/data/apps/
 config.json
