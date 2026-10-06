@@ -22,7 +22,7 @@ callsign login.
 | WX-ME | `wx-me.mu` | NWS Maine/New Hampshire text products |
 | About | `about.mu` | Node info |
 
-More bpq-apps are listed on the menu as "soon" and will be ported over time.
+More bpq-apps are listed greyed-out on the menu and will be ported over time.
 
 **Offline-first:** every app that pulls from the internet caches what it gets
 and serves the cached copy, clearly marked, when the source is unreachable.

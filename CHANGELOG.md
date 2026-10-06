@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2 - 2026-10-06
+
+- **index** 1.1: mobile-friendly. Smaller "Apps" logo, shorter welcome lines,
+  menu rows fit about 36 columns, no "(soon)" suffix; greyed-out entries are
+  apps not ported yet.
+
 ## 1.1 - 2026-10-05
 
 - **about** 1.1: uptime now shows the node's own uptime; it was showing the
