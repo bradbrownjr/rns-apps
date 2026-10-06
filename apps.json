@@ -19,7 +19,7 @@
       {
         "name": "FORMS",
         "description": "Message forms",
-        "page": null
+        "page": "forms"
       }
     ],
     "Weather": [
@@ -75,7 +75,7 @@
       {
         "name": "GOPHER",
         "description": "Gopher browser",
-        "page": null
+        "page": "gopher"
       }
     ],
     "Tools": [

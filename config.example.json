@@ -5,5 +5,8 @@
   ],
   "repeaterbook_token": "",
   "ical_url": "https://calendar.google.com/calendar/ical/<id>/public/basic.ics",
-  "timezone": "America/New_York"
+  "timezone": "America/New_York",
+  "forms_deliver_to": [
+    "<32-hex LXMF delivery address>"
+  ]
 }

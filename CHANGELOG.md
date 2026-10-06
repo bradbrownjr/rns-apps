@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.7 - 2026-10-06
+
+Ports from bpq-apps, batch 4. Every bpq-apps app is now ported.
+
+- **gopher** 1.0: menus as links, paged text files, search items, bookmarks.
+  Refuses non-public addresses so the node can't probe its own network.
+- **forms** 1.0: 12 form templates (`data/forms/`). A wizard fills one field
+  per page (draft kept per identity), reviews, then formats the result
+  (standard, PACKET CHECK-IN, NTS radiogram with the NTS text rules, strip
+  responses), shows it to copy, saves it in `forms_outbox/`, and queues it for
+  LXMF delivery. Sysops browse submissions at `forms.mu?a=outbox`.
+- **tools/lxmf_sender.py**: container daemon that delivers queued forms over
+  LXMF to the addresses in `config.json` `forms_deliver_to`; retries for 48 h.
+  Started by `docker/entrypoint.py` (new image).
+- **lib/formsfmt.py**: form validation and output formatting.
+
 ## 1.6 - 2026-10-06
 
 Ports from bpq-apps, batch 3 (tools).

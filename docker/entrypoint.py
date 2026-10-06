@@ -12,6 +12,7 @@ so hand edits survive restarts.
 
 import importlib
 import os
+import subprocess
 import sys
 
 from RNS.vendor.configobj import ConfigObj
@@ -86,10 +87,21 @@ def write_nomad_config():
     cfg.write()
 
 
+def start_form_sender():
+    """LXMF delivery of submitted forms. Waits for nomadnet's shared Reticulum
+    instance, idles when no destinations are configured, and is restarted if
+    it ever exits. Lives in the app mount, so deploys update it."""
+    script = "/opt/rns-apps/tools/lxmf_sender.py"
+    if not os.path.exists(script):
+        return
+    subprocess.Popen(["sh", "-c", "while true; do python3 '{}'; sleep 15; done".format(script)])
+
+
 def main():
     os.makedirs(APPS_DATA, exist_ok=True)
     write_rns_config()
     write_nomad_config()
+    start_form_sender()
     os.execvp("nomadnet", ["nomadnet", "--daemon", "--console",
                            "--config", NOMAD_DIR, "--rnsconfig", RNS_DIR])
 

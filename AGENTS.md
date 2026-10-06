@@ -38,7 +38,9 @@ its stdout as micron. This is request/response, not a terminal session:
 apps.json           Menu registry (categories -> name/description/page; page null = "soon")
 lib/rnsapps.py      Shared helpers: request vars, identity, micron, cache, locking, run()
 pages/*.mu          Executable Python pages (index.mu = home menu)
-tools/              rns_fetch.py (fetch pages over Reticulum), node_info.py (node address)
+tools/              rns_fetch.py (fetch pages over Reticulum), node_info.py (node address), lxmf_sender.py (delivers submitted forms over LXMF; started by the entrypoint)
+data/               Static assets shipped with the code: forms/*.frm, question_pools/, regions.json (runtime data is /data/apps, not here)
+feeds.json          RSS/Atom feeds for NEWS
 docker/             Dockerfile, entrypoint.py (writes configs), Unraid template
 .github/workflows/  docker.yml publishes ghcr.io/bradbrownjr/rns-apps (amd64+arm64) on docker/ changes
 deploy.sh           tar-over-ssh sync to the Docker host (--build: local test image only)

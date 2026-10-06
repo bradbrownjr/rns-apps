@@ -30,9 +30,11 @@ login.
 | ANTENNA | `antenna.mu` | Antenna calculators, US band plan, formulas, shared antenna database |
 | HAMTEST | `hamtest.mu` | Practice license exams (Technician, General, Extra) with the NCVEC question pools |
 | PREDICT | `predict.mu` | HF band and hour estimates between any two places, from live solar data |
+| GOPHER | `gopher.mu` | Gopher browser: menus, text files, search, bookmarks (public hosts only) |
+| FORMS | `forms.mu` | ICS-213, radiogram, net check-in, SKYWARN strips and more, filled one field per page; saved on the node and delivered over LXMF |
 | About | `about.mu` | Node info |
 
-More bpq-apps are listed greyed-out on the menu and will be ported over time.
+Every bpq-apps app is ported. Two need node configuration in `config.json`: `repeaterbook_token` (REPEATER) and `forms_deliver_to` (FORMS LXMF delivery).
 
 **Offline-first:** every app that pulls from the internet caches what it gets
 and serves the cached copy, clearly marked, when the source is unreachable.
