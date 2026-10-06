@@ -9,23 +9,25 @@ micron. The page gets no stdin, and its environment holds only PATH plus:
     field_<name>      submitted form fields
     var_<name>        link variables
 
-Version: 1.2
+Version: 1.3
 Author: Brad Brown Jr (KC1JMH)
 """
 
 import fcntl
 import json
+import math
 import os
 import re
 import sys
 import tempfile
 import time
 import traceback
+import urllib.parse
 import urllib.request
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = "1.2"
+VERSION = "1.3"
 
 # NomadNet passes no environment beyond PATH, so these defaults are what the
 # container uses. The env overrides exist for running pages locally.
@@ -60,6 +62,11 @@ def var(name, default=""):
 
 def field(name, default=""):
     return os.environ.get("field_" + name, default).strip()
+
+
+def arg(name, default=""):
+    """Form field if submitted, else link variable. Lets one page take both."""
+    return field(name) or var(name, default)
 
 
 def int_var(name, default=0):
@@ -284,10 +291,16 @@ def age_text(epoch):
 
 # ------------------------------------------------------------------ fetch ---
 
-def http_get(url, timeout=HTTP_TIMEOUT):
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+def http_get(url, timeout=HTTP_TIMEOUT, headers=None):
+    hdrs = {"User-Agent": USER_AGENT}
+    hdrs.update(headers or {})
+    req = urllib.request.Request(url, headers=hdrs)
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return resp.read()
+
+
+def http_json(url, timeout=HTTP_TIMEOUT, headers=None):
+    return json.loads(http_get(url, timeout, headers).decode("utf-8", "replace"))
 
 
 def cached(key, ttl, fetch):
@@ -323,6 +336,81 @@ def freshness(ts, stale):
     if stale:
         return color("OFFLINE: showing cached copy from {} ({})".format(stamp, age_text(ts)), C_WARN)
     return dim("Updated {} ({})".format(stamp, age_text(ts)))
+
+
+# -------------------------------------------------------------------- geo ---
+
+GRID_RE = re.compile(r"^[A-R]{2}\d{2}([A-X]{2})?$", re.I)
+LATLON_RE = re.compile(r"^\s*(-?\d{1,2}(?:\.\d+)?)\s*[, ]\s*(-?\d{1,3}(?:\.\d+)?)\s*$")
+
+
+def grid_to_latlon(grid):
+    """Center of a 4 or 6 character Maidenhead locator -> (lat, lon)."""
+    g = grid.strip().upper()
+    lon = (ord(g[0]) - 65) * 20 - 180
+    lat = (ord(g[1]) - 65) * 10 - 90
+    lon += int(g[2]) * 2
+    lat += int(g[3])
+    if len(g) >= 6:
+        lon += (ord(g[4]) - 65) * (2 / 24) + (1 / 24)
+        lat += (ord(g[5]) - 65) * (1 / 24) + (1 / 48)
+    else:
+        lon += 1
+        lat += 0.5
+    return lat, lon
+
+
+def distance_mi(lat1, lon1, lat2, lon2):
+    """Great-circle distance in miles."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp, dl = p2 - p1, math.radians(lon2 - lon1)
+    h = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 3958.8 * 2 * math.asin(math.sqrt(h))
+
+
+def hamdb(call):
+    """HamDB (US FCC data) record for a callsign, or None. Cached 24 h."""
+    call = call.upper()
+    data, _, _ = cached("hamdb_" + call, 86400,
+                        lambda: http_json("https://api.hamdb.org/v1/{}/json".format(call)))
+    rec = (data or {}).get("hamdb", {}).get("callsign", {})
+    return rec if rec.get("call") and rec.get("call") != "NOT_FOUND" else None
+
+
+def nws_point(lat, lon):
+    """NWS /points metadata (grid, forecast URLs, nearest city/state). Cached 30 days."""
+    key = "nwspoint_{:.4f}_{:.4f}".format(lat, lon)
+    data, _, _ = cached(key, 30 * 86400,
+                        lambda: http_json("https://api.weather.gov/points/{:.4f},{:.4f}".format(lat, lon)))
+    return (data or {}).get("properties") or {}
+
+
+def resolve_location(text):
+    """
+    Turn user input into (lat, lon, label). Accepts a callsign (HamDB),
+    a Maidenhead grid, 'lat,lon', or a place name / ZIP (OpenStreetMap
+    Nominatim, cached 30 days). Raises ValueError with a visitor-friendly
+    message when it can't.
+    """
+    text = " ".join(text.split())
+    if not text:
+        raise ValueError("Enter a callsign, grid square, ZIP or place name.")
+    if CALLSIGN_RE.match(text.upper()):
+        rec = hamdb(text)
+        if not rec or not rec.get("lat"):
+            raise ValueError("No location found for callsign {}.".format(text.upper()))
+        return float(rec["lat"]), float(rec["lon"]), text.upper()
+    if GRID_RE.match(text):
+        lat, lon = grid_to_latlon(text)
+        return lat, lon, text.upper()
+    m = LATLON_RE.match(text)
+    if m:
+        return float(m.group(1)), float(m.group(2)), "{}, {}".format(m.group(1), m.group(2))
+    url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=" + urllib.parse.quote(text)
+    data, _, _ = cached("geo_" + text.lower(), 30 * 86400, lambda: http_json(url))
+    if not data:
+        raise ValueError("Couldn't find '{}'. Try a ZIP, 'City ST', or a grid square.".format(text))
+    return float(data[0]["lat"]), float(data[0]["lon"]), text
 
 
 # ------------------------------------------------------------------- run ---

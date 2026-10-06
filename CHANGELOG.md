@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.4 - 2026-10-06
+
+Ports from bpq-apps, batch 1 (reference lookups).
+
+- **qrz** 1.0: US callsign lookup via HamDB (no QRZ.com login needed).
+- **dict** 1.0: dictionary over the DICT protocol (dict.org), one entry per
+  source, "did you mean" suggestions.
+- **wx** 1.0: NWS weather for any US place (ZIP, City ST, grid, callsign,
+  lat/lon): conditions, 7-day, hourly, alerts, AFD, HWO. Profile location
+  shortcut for registered users.
+- **repeater** 1.0: RepeaterBook by state or near a location, band/mode/radius
+  filters. RepeaterBook now requires an app token (`repeaterbook_token` in
+  `config.json`); without one it serves whatever is cached.
+- **lib** 1.3: `arg()`, `http_json()`, `resolve_location()`, `grid_to_latlon()`,
+  `distance_mi()`, `hamdb()`, `nws_point()`.
+
 ## 1.3 - 2026-10-06
 
 Most visitors won't be hams, and many want to stay anonymous.

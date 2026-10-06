@@ -2,5 +2,6 @@
   "node_name": "Your Callsign BBS",
   "sysops": [
     "0123456789abcdef0123456789abcdef"
-  ]
+  ],
+  "repeaterbook_token": ""
 }

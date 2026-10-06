@@ -1,31 +1,99 @@
 {
   "categories": {
     "Main": [
-      {"name": "WALL", "description": "Leave your mark!", "page": "wall"},
-      {"name": "ABOUT", "description": "About this node", "page": "about"},
-      {"name": "CALENDAR", "description": "Event calendar", "page": null},
-      {"name": "FORMS", "description": "Message forms", "page": null}
+      {
+        "name": "WALL",
+        "description": "Leave your mark!",
+        "page": "wall"
+      },
+      {
+        "name": "ABOUT",
+        "description": "About this node",
+        "page": "about"
+      },
+      {
+        "name": "CALENDAR",
+        "description": "Event calendar",
+        "page": null
+      },
+      {
+        "name": "FORMS",
+        "description": "Message forms",
+        "page": null
+      }
     ],
     "Weather": [
-      {"name": "SPACE", "description": "Space weather", "page": "space"},
-      {"name": "WX-ME", "description": "ME/NH weather", "page": "wx-me"},
-      {"name": "WX", "description": "Weather reports", "page": null}
+      {
+        "name": "SPACE",
+        "description": "Space weather",
+        "page": "space"
+      },
+      {
+        "name": "WX-ME",
+        "description": "ME/NH weather",
+        "page": "wx-me"
+      },
+      {
+        "name": "WX",
+        "description": "Weather reports",
+        "page": "wx"
+      }
     ],
     "Reference": [
-      {"name": "HAMQSL", "description": "Band conditions", "page": "hamqsl"},
-      {"name": "DICT", "description": "Dictionary", "page": null},
-      {"name": "QRZ", "description": "Callsign lookup", "page": null},
-      {"name": "REPEATER", "description": "Repeater search", "page": null}
+      {
+        "name": "HAMQSL",
+        "description": "Band conditions",
+        "page": "hamqsl"
+      },
+      {
+        "name": "DICT",
+        "description": "Dictionary",
+        "page": "dict"
+      },
+      {
+        "name": "QRZ",
+        "description": "Callsign lookup",
+        "page": "qrz"
+      },
+      {
+        "name": "REPEATER",
+        "description": "Repeater search",
+        "page": "repeater"
+      }
     ],
     "Browsers": [
-      {"name": "NEWS", "description": "News feeds", "page": null},
-      {"name": "WIKI", "description": "Wikipedia browser", "page": null},
-      {"name": "GOPHER", "description": "Gopher browser", "page": null}
+      {
+        "name": "NEWS",
+        "description": "News feeds",
+        "page": null
+      },
+      {
+        "name": "WIKI",
+        "description": "Wikipedia browser",
+        "page": null
+      },
+      {
+        "name": "GOPHER",
+        "description": "Gopher browser",
+        "page": null
+      }
     ],
     "Tools": [
-      {"name": "ANTENNA", "description": "Antenna calculator", "page": null},
-      {"name": "HAMTEST", "description": "Exam practice", "page": null},
-      {"name": "PREDICT", "description": "QSO planning", "page": null}
+      {
+        "name": "ANTENNA",
+        "description": "Antenna calculator",
+        "page": null
+      },
+      {
+        "name": "HAMTEST",
+        "description": "Exam practice",
+        "page": null
+      },
+      {
+        "name": "PREDICT",
+        "description": "QSO planning",
+        "page": null
+      }
     ]
   }
 }

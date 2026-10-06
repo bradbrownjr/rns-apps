@@ -20,6 +20,10 @@ login.
 | HAMQSL | `hamqsl.mu` | Solar data and HF/VHF band conditions (hamqsl.com) |
 | SPACE | `space.mu` | NOAA SWPC space weather reports |
 | WX-ME | `wx-me.mu` | NWS Maine/New Hampshire text products |
+| QRZ | `qrz.mu` | US callsign lookup (HamDB / FCC data) |
+| DICT | `dict.mu` | Dictionary (dict.org: WordNet, GCIDE, ...) |
+| WX | `wx.mu` | NWS weather for any US place: conditions, forecast, alerts, AFD, HWO |
+| REPEATER | `repeater.mu` | RepeaterBook search by state or near a ZIP/grid/callsign (needs `repeaterbook_token`) |
 | About | `about.mu` | Node info |
 
 More bpq-apps are listed greyed-out on the menu and will be ported over time.
