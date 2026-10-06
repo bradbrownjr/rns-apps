@@ -56,6 +56,19 @@ Sysops are identity hashes listed in `/data/apps/config.json`.
 
 ---
 
+## Sysop and identity security
+
+- A sysop is an identity hash in `config.json` `"sysops"`. RNS verifies the
+  identity by signature when a client identifies, and pages only see it as the
+  `remote_identity` environment variable; client-sent values arrive as
+  `var_*`/`field_*` and can never set it. So a sysop can't be impersonated by
+  choosing a handle or crafting a link.
+- **NEVER** decide authority from a handle. Use `ra.is_sysop(ident)`.
+- Show `ra.sysop_badge(ident)` (derived from identity) next to names.
+- Reserve a sysop's handle with `config.json` `"sysop_handles": {"<id>": "Name"}`.
+- Destructive sysop links ask for confirmation (`ok=1`).
+- Keep the sysop's private identity file safe; whoever holds it is the sysop.
+
 ## ALWAYS / NEVER Rules
 
 ### Output

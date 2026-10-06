@@ -2,7 +2,7 @@
 """
 rns-apps home page: categorized app menu (port of bpq-apps apps.py).
 
-Version: 1.4
+Version: 1.5
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -10,9 +10,10 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
+import bbs  # noqa: E402
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.4"
+VERSION = "1.5"
 
 # Left-aligned and pre-indented: centering (`c) would center every line of the
 # block on its own and shear the art.
@@ -31,7 +32,19 @@ def welcome(ident):
     now = ra.dim("{} UTC".format(ra.utc_now().strftime("%H:%M")))
     handle = ra.handle_for(ident)
     if handle:
-        return "Welcome {}  {}".format(ra.link(handle, "register"), now)
+        line = "Welcome {}  {}".format(ra.link(handle, "register"), now)
+        try:
+            conn = bbs.connect()
+            mail, new = bbs.mail_unread(conn, ident), bbs.unread_total(conn, ident)
+        except Exception:
+            ra.log_error("index counts")
+            mail = new = 0
+        notes = []
+        if mail:
+            notes.append(ra.link("{} new mail".format(mail), "mail"))
+        if new:
+            notes.append(ra.link("{} new thread{}".format(new, "" if new == 1 else "s"), "msg"))
+        return line + ("\n" + "  ".join(notes) if notes else "")
     if ident:
         return "Welcome! {}\n{} to pick a handle".format(now, ra.link("Register", "register"))
     return "Welcome, guest. {}\n{}".format(now, ra.dim("Identify to post and register."))
@@ -62,7 +75,7 @@ def render():
                 out.append(ra.dim("{}{}{}".format(app["name"], pad, app["description"])))
 
     if ra.is_sysop(ident):
-        out += ["", "<", ra.divider(), ra.color("[sysop]", ra.C_OK)]
+        out += ["", "<", ra.divider(), ra.link("Sysop tools", "sysop")]
     return "\n".join(out)
 
 

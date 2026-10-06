@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.0 - 2026-10-06
+
+Message boards and mail (step 1 and 2 of docs/BBS-PLAN.md).
+
+- **msg** 1.0: boards, threads, replies and reply-with-quote, compose drafts,
+  unread markers, delete own post for 15 minutes, sysop lock/pin/delete.
+- **mail** 1.0: private mail by handle, conversation threading, reply and
+  quote, inbox/sent, block sender, mailbox cap.
+- **sysop** 1.0: boards (create, rename, order, read-only/locked/hidden,
+  delete if empty), users, mutes. Sysops are recognized only by the verified
+  identity hash in `config.json` `sysops`.
+- **lib/bbs.py**: SQLite (`/data/apps/bbs.db`, migrations) for all of it.
+- **Handles hardened**: lookalikes collide (Brad/Bradl/Br4d), reserved words
+  (sysop, admin, ...), `sysop_handles` in `config.json` reserves a handle for
+  one identity, and sysops carry a `[sysop]` badge shown from their identity,
+  not their handle.
+- **index** 1.5: new-mail and new-thread counts in the welcome block.
+
 ## 1.9 - 2026-10-06
 
 - **www** 1.0: text web browser (port of bpq-apps www.py): URL or search words

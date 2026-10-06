@@ -9,7 +9,7 @@ micron. The page gets no stdin, and its environment holds only PATH plus:
     field_<name>      submitted form fields
     var_<name>        link variables
 
-Version: 1.5
+Version: 1.6
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -27,7 +27,7 @@ import urllib.request
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = "1.5"
+VERSION = "1.6"
 
 # NomadNet passes no environment beyond PATH, so these defaults are what the
 # container uses. The env overrides exist for running pages locally.
@@ -220,6 +220,37 @@ def callsign_for(ident):
     return profile(ident).get("callsign") or None
 
 
+RESERVED_HANDLES = {"sysop", "admin", "administrator", "root", "moderator", "mod", "system", "staff",
+                    "support", "postmaster", "guest", "anonymous", "node", "bbs"}
+
+
+def handle_skeleton(handle):
+    """Lookalike-proof form of a handle: case, separators and common
+    substitutions (0/o, 1/l/i, 5/s, 3/e) are folded so 'Brad', 'BRAD',
+    'Br4d'-style and 'Bradl'/'BradI' variants collide."""
+    h = re.sub(r"[_.\-]", "", handle.lower())
+    return h.translate(str.maketrans({"0": "o", "1": "l", "i": "l", "5": "s", "3": "e", "$": "s"}))
+
+
+def handle_reserved_for(handle):
+    """Identity that owns this handle by config, '' if reserved for nobody,
+    None if free. config.json: "sysop_handles": {"<identity>": "Brad"} and
+    optional "reserved_handles": ["..."]."""
+    cfg = config()
+    skel = handle_skeleton(handle)
+    for ident, name in (cfg.get("sysop_handles") or {}).items():
+        if handle_skeleton(name) == skel:
+            return ident.lower()
+    for name in RESERVED_HANDLES | set(h.lower() for h in cfg.get("reserved_handles", [])):
+        if handle_skeleton(name) == skel:
+            return ""
+    return None
+
+
+def sysop_badge(ident):
+    return color(" [sysop]", C_OK) if is_sysop(ident) else ""
+
+
 def save_profile(ident, handle, name="", callsign="", location=""):
     """
     Validate and store a profile. Only the handle is required and public;
@@ -234,11 +265,16 @@ def save_profile(ident, handle, name="", callsign="", location=""):
         return False, "'{}' doesn't look like a callsign (no SSID). Leave it blank if you have none.".format(callsign)
     if len(name) > 40 or len(location) > 40:
         return False, "Name and location are limited to 40 characters."
+    owner = handle_reserved_for(handle)
+    if owner is not None and owner != ident and not is_sysop(ident):
+        return False, "Handle '{}' is reserved.".format(handle)
+    if owner == "" and not is_sysop(ident):
+        return False, "Handle '{}' is reserved.".format(handle)
     with locked("users"):
         data = users()
         for other, rec in data.items():
-            if other != ident and rec.get("handle", "").lower() == handle.lower():
-                return False, "Handle '{}' is already taken.".format(handle)
+            if other != ident and handle_skeleton(rec.get("handle", "")) == handle_skeleton(handle):
+                return False, "Handle '{}' is too close to one already taken.".format(handle)
         rec = data.get(ident, {})
         rec.update({"handle": handle, "name": name, "callsign": callsign, "location": location,
                     "updated": utc_iso()})

@@ -7,6 +7,16 @@
         "page": "wall"
       },
       {
+        "name": "MSG",
+        "description": "Message boards",
+        "page": "msg"
+      },
+      {
+        "name": "MAIL",
+        "description": "Private mail",
+        "page": "mail"
+      },
+      {
         "name": "ABOUT",
         "description": "About this node",
         "page": "about"
