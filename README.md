@@ -20,7 +20,7 @@ login.
 | HAMQSL | `hamqsl.mu` | Solar data and HF/VHF band conditions (hamqsl.com) |
 | SPACE | `space.mu` | NOAA SWPC space weather reports |
 | WX-ME | `wx-me.mu` | NWS Maine/New Hampshire text products |
-| QRZ | `qrz.mu` | US callsign lookup (HamDB / FCC data) |
+| QRZ | `qrz.mu` | Callsign lookup: QRZ.com XML API (`qrz_user`/`qrz_password`), else HamDB (US FCC data) |
 | DICT | `dict.mu` | Dictionary (dict.org: WordNet, GCIDE, ...) |
 | WX | `wx.mu` | NWS weather for any US place: conditions, forecast, alerts, AFD, HWO |
 | REPEATER | `repeater.mu` | RepeaterBook search by state or near a ZIP/grid/callsign (needs `repeaterbook_token`) |

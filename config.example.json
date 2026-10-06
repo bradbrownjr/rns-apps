@@ -8,5 +8,7 @@
   "timezone": "America/New_York",
   "forms_deliver_to": [
     "<32-hex LXMF delivery address>"
-  ]
+  ],
+  "qrz_user": "",
+  "qrz_password": ""
 }

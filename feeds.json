@@ -18,6 +18,10 @@
         "url": "https://www.amsat.org/feed/"
       },
       {
+        "name": "Maine Packet Network",
+        "url": "https://www.mainepacketradio.org/feed"
+      },
+      {
         "name": "On All Bands",
         "url": "https://feeds.feedburner.com/OnAllBands"
       },
