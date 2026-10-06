@@ -78,7 +78,7 @@ Sysops are identity hashes listed in `/data/apps/config.json`.
 - **ALWAYS** keep `VERSION` and the docstring `Version:` in sync per file.
 - Inside a container, `/proc/uptime` is the host's uptime. Use PID 1's start
   time for node uptime (see `about.mu`).
-- **NEVER** draw logos or banners with `_` (renders broken on mobile page browsers); use `#`.
+- **NEVER** center (`` `c ``) a literal block or ASCII art: clients center every line on its own and shear the art. Left-align and indent it by hand. `` `= `` is micron's `<pre>`.
 - **NEVER** commit real IPs, hostnames, identity hashes or `config.json`;
   use placeholders (see `config.example.json`).
 - **NEVER** put `--` inside an XML comment in `docker/unraid-template.xml` (e.g. a

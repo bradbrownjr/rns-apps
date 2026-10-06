@@ -11,7 +11,8 @@ Most visitors won't be hams, and many want to stay anonymous.
   `callsign_for()` now returns the optional callsign, or None (apps that need
   one should ask for it).
 - **wall** 1.1: posts are labeled with the handle.
-- **index** 1.2: logo drawn with `#` (the "_" art rendered broken on phones);
+- **index** 1.3: "Apps" logo restored and left-aligned (centering sheared it:
+  clients center each line of a literal block separately);
   Register appears once (the welcome line, which links to your profile when
   registered); About moved into Main.
 
