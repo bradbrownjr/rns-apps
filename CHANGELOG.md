@@ -16,6 +16,8 @@ Files area and LXMF uploads (steps 3 and 4 of docs/BBS-PLAN.md).
 - **rns_fetch**: bare page names work (`files` = `/page/files.mu`); failures print the reason.
 - **search** 1.0: searches thread titles, posts, and files; hidden boards/areas only for sysops.
 - Approve/reject sends the uploader an LXMF notice (optional reject reason) via `lxmf_notify/`.
+- **files/index** : "N new files" on the welcome line and NEW markers, counted from your last visit to the Files top page (DB migration 3, `prefs` table).
+- **mail**: opt-in LXMF notice on new mail (sender and subject only, never the body).
 - Image: `files_path` and `file_refresh_interval` set by the entrypoint.
 
 ## 2.0 - 2026-10-06

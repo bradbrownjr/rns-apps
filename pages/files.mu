@@ -42,6 +42,10 @@ def render():
     area = conn.execute("SELECT * FROM file_areas WHERE id=?", (area_id,)).fetchone() if area_id else None
     if area and area["hidden"] and not ra.is_sysop(ra.identity()):
         area = None
+    ident = ra.identity()
+    seen = bbs.pref_get(conn, ident, "files_seen") if ident else 0
+    if ident and not area:
+        bbs.pref_set(conn, ident, "files_seen", bbs.now())
     out = [ra.heading(area["name"] if area else "Files")]
     if area:
         crumbs = [ra.link("Files", "files")] + [ra.link(n, "files", a=i) for i, n in bbs.area_path(conn, area["id"])[:-1]]
@@ -64,7 +68,7 @@ def render():
         if subs and rows:
             out.append("")
         for f in rows:
-            out.append(ra.link(f["title"], "/file/a{}/{}".format(f["area_id"], f["fname"])))
+            out.append(ra.link(f["title"], "/file/a{}/{}".format(f["area_id"], f["fname"])) + (ra.color(" NEW", ra.C_OK) if seen and f["created"] > seen else ""))
             out.append(ra.dim("{}  {}  by {}  {}".format(f["fname"], bbs.human_size(f["size"]),
                                                        ra.display_name(f["uploader"]) if f["uploader"] else "sysop", ra.age_text(f["created"]))))
             if f["description"]:

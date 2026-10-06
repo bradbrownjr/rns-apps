@@ -35,15 +35,17 @@ def welcome(ident):
         line = "Welcome {}  {}".format(ra.link(handle, "register"), now)
         try:
             conn = bbs.connect()
-            mail, new = bbs.mail_unread(conn, ident), bbs.unread_total(conn, ident)
+            mail, new, files = bbs.mail_unread(conn, ident), bbs.unread_total(conn, ident), bbs.new_files(conn, ident)
         except Exception:
             ra.log_error("index counts")
-            mail = new = 0
+            mail = new = files = 0
         notes = []
         if mail:
             notes.append(ra.link("{} new mail".format(mail), "mail"))
         if new:
             notes.append(ra.link("{} new thread{}".format(new, "" if new == 1 else "s"), "msg"))
+        if files:
+            notes.append(ra.link("{} new file{}".format(files, "" if files == 1 else "s"), "files"))
         return line + ("\n" + "  ".join(notes) if notes else "")
     if ident:
         return "Welcome! {}\n{} to pick a handle".format(now, ra.link("Register", "register"))

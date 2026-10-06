@@ -55,7 +55,10 @@ def list_view(conn, ident, box, page, note=""):
         pager.append(ra.link("< Newer", "mail", box=box, p=page - 1))
     if page < pages:
         pager.append(ra.link("Older >", "mail", box=box, p=page + 1))
-    return out + ["", ra.dim("Page {} of {}".format(page, pages)), ra.nav(*pager)]
+    on = bbs.pref_get(conn, ident, "mail_notify")
+    return out + ["", ra.dim("Page {} of {}".format(page, pages)),
+                  ra.dim("LXMF notice on new mail: {} ".format("on" if on else "off")) + ra.link("turn " + ("off" if on else "on"), "mail", a="notify"),
+                  ra.nav(*pager)]
 
 
 def message_view(conn, ident, mail_id, box, note=""):
@@ -148,6 +151,9 @@ def render():
             return "\n".join(list_view(conn, ident, "out", 1, "Sent."))
         return "\n".join(compose_view(conn, ident, draft))
 
+    if a == "notify":
+        bbs.pref_set(conn, ident, "mail_notify", 1 - bbs.pref_get(conn, ident, "mail_notify"))
+        return "\n".join(list_view(conn, ident, "in", 1, "Notices {}.".format("on" if bbs.pref_get(conn, ident, "mail_notify") else "off")))
     if a == "del" and mail_id:
         bbs.delete_mail(conn, ident, mail_id)
         return "\n".join(list_view(conn, ident, box, 1, "Deleted."))

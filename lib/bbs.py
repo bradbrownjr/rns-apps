@@ -80,6 +80,9 @@ MIGRATIONS = [
         id INTEGER PRIMARY KEY, fname TEXT NOT NULL, orig_name TEXT, size INTEGER, sha256 TEXT,
         sender TEXT, note TEXT DEFAULT '', created INTEGER, status TEXT DEFAULT 'pending', scan TEXT DEFAULT '');
     """,
+    """
+    CREATE TABLE prefs (identity TEXT PRIMARY KEY, mail_notify INTEGER DEFAULT 0, files_seen INTEGER DEFAULT 0);
+    """,
 ]
 
 
@@ -447,7 +450,30 @@ def send_mail(conn, ident, to_handle, subject, body, parent_id=None):
         cur = conn.execute("INSERT INTO mail (conv_id,parent_id,sender,recipient,subject,body,created) VALUES (0,?,?,?,?,?,?)",
                            (parent_id, ident, recipient, subject, body, t))
         conn.execute("UPDATE mail SET conv_id=? WHERE id=?", (conv["conv_id"] if conv else cur.lastrowid, cur.lastrowid))
+    if pref_get(conn, recipient, "mail_notify"):
+        notify(recipient, "New mail", "New mail from {} on this node: {}".format(ra.display_name(ident), subject))
     return True, "Sent.", cur.lastrowid
+
+
+def pref_get(conn, ident, col):
+    row = conn.execute("SELECT {} FROM prefs WHERE identity=?".format(col), (ident,)).fetchone()
+    return row[0] if row else 0
+
+
+def pref_set(conn, ident, col, value):
+    assert col in ("mail_notify", "files_seen")
+    conn.execute("INSERT OR IGNORE INTO prefs (identity) VALUES (?)", (ident,))
+    conn.execute("UPDATE prefs SET {}=? WHERE identity=?".format(col), (value, ident))
+
+
+def new_files(conn, ident):
+    """Files added since this identity last opened the Files page."""
+    if not ident:
+        return 0
+    seen = pref_get(conn, ident, "files_seen")
+    if not seen:
+        return 0
+    return conn.execute("SELECT COUNT(*) FROM files f JOIN file_areas a ON a.id=f.area_id WHERE a.hidden=0 AND f.created>?", (seen,)).fetchone()[0]
 
 
 def mail_visible(row, ident):

@@ -17,6 +17,6 @@ Open items, as of 2026-10-06. Done items move to CHANGELOG.md.
 
 - [x] Tell the sender when an upload is approved or rejected (LXMF notice, with the reject reason).
 - [x] Search across boards and files (SEARCH on the main menu).
-- [ ] Menu unread counts for files (new since last visit).
-- [ ] Optional LXMF notice for new mail.
+- [x] Menu unread counts for files (new since last visit).
+- [x] Optional LXMF notice for new mail (opt-in toggle on the Mail page).
 - [ ] Update skills/README with the Files area screenshots/flow once tested on a phone.
