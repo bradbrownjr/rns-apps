@@ -22,6 +22,11 @@
         "page": "files"
       },
       {
+        "name": "SEARCH",
+        "description": "Search boards and files",
+        "page": "search"
+      },
+      {
         "name": "ABOUT",
         "description": "About this node",
         "page": "about"

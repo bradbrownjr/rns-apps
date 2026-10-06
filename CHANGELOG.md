@@ -14,6 +14,8 @@ Files area and LXMF uploads (steps 3 and 4 of docs/BBS-PLAN.md).
   unmuted senders; per-file, daily and queue limits (`upload_max_bytes`,
   `upload_daily_bytes`, `upload_pending_max`).
 - **rns_fetch**: bare page names work (`files` = `/page/files.mu`); failures print the reason.
+- **search** 1.0: searches thread titles, posts, and files; hidden boards/areas only for sysops.
+- Approve/reject sends the uploader an LXMF notice (optional reject reason) via `lxmf_notify/`.
 - Image: `files_path` and `file_refresh_interval` set by the entrypoint.
 
 ## 2.0 - 2026-10-06

@@ -518,3 +518,14 @@ def remove_file(conn, file_id):
         os.remove(path)
     with tx(conn):
         conn.execute("DELETE FROM files WHERE id=?", (file_id,))
+
+
+def notify(ident, title, body):
+    """Queue an LXMF notice to an identity; tools/lxmf_sender.py delivers it."""
+    import secrets
+    spool = os.path.join(ra.DATA_DIR, "lxmf_notify")
+    os.makedirs(spool, exist_ok=True)
+    path = os.path.join(spool, "{}-{}.json".format(now(), secrets.token_hex(3)))
+    with open(path + ".tmp", "w") as f:
+        json.dump({"identity": ident, "title": title, "body": body}, f)
+    os.replace(path + ".tmp", path)

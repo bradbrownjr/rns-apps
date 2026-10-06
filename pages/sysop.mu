@@ -154,7 +154,8 @@ def upload_view(conn, uid, note=""):
             ra.input_field("title", 40, u["orig_name"] or u["fname"]), ra.dim("Approve into area:")]
     for r, depth in bbs.area_tree(conn, True):
         out.append("  " * depth + ra.submit("Approve into {}".format(r["name"]), "sysop", "title", a="approve", v="pending", u=uid, f=r["id"]))
-    out += ["", ra.link("Reject and delete", "sysop", a="reject", v="pending", u=uid)]
+    out += ["", ra.dim("Reject reason (optional, sent to the uploader)"), ra.input_field("reason", 50, ""),
+            ra.submit("Reject and delete", "sysop", "reason", a="reject", v="pending", u=uid)]
     return out + [ra.nav(("Pending", "sysop"))]
 
 
@@ -273,6 +274,8 @@ def render():
             if os.path.exists(src):
                 os.remove(src)
             conn.execute("UPDATE uploads SET status='rejected' WHERE id=?", (uid,))
+            bbs.notify(u["sender"], "Upload rejected", "Your upload {} was not accepted.{}".format(
+                u["orig_name"], " Reason: " + ra.field("reason") if ra.field("reason") else ""))
             note = "Rejected."
         elif u["scan"].startswith("infected"):
             note = "Scan flagged this file; reject it."
@@ -281,6 +284,7 @@ def render():
                                         u["note"], u["sender"], u["scan"])
             if ok:
                 conn.execute("UPDATE uploads SET status='approved' WHERE id=?", (uid,))
+                bbs.notify(u["sender"], "Upload approved", "Your upload {} is now in Files.".format(u["orig_name"]))
                 note = "Approved."
         else:
             note = "Pick an area."

@@ -18,7 +18,7 @@ the pending queue for sysop approval. Config keys (config.json):
 upload_max_bytes (2 MB), upload_daily_bytes (10 MB), upload_pending_max (50),
 clamd_host, clamd_port, clamd_scan (executables|all|off).
 
-Version: 1.1
+Version: 1.2
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -154,6 +154,38 @@ def handle_upload(message, router, source, RNS, LXMF):
     reply("\n".join(results) or "Nothing usable in that message.")
 
 
+def send_notices(router, source, RNS, LXMF, inflight):
+    """Deliver queued lxmf_notify/*.json notices (upload approved/rejected)."""
+    for path in sorted(glob.glob(os.path.join(APPS_DIR, "lxmf_notify", "*.json"))):
+        if time.time() - os.path.getctime(path) > GIVE_UP:
+            os.remove(path)
+            inflight.pop(path, None)
+            continue
+        if path in inflight:
+            msg, started = inflight[path]
+            if msg.state == LXMF.LXMessage.DELIVERED:
+                os.remove(path)
+                inflight.pop(path)
+            elif msg.state == LXMF.LXMessage.FAILED or time.time() - started > RETRY:
+                inflight.pop(path)
+            continue
+        rec = load(path)
+        if not rec:
+            continue
+        try:
+            recipient_identity = RNS.Identity.recall(bytes.fromhex(rec["identity"]), from_identity_hash=True)
+        except (ValueError, KeyError):
+            os.remove(path)
+            continue
+        if recipient_identity is None:
+            continue
+        recipient = RNS.Destination(recipient_identity, RNS.Destination.OUT, RNS.Destination.SINGLE, "lxmf", "delivery")
+        msg = LXMF.LXMessage(recipient, source, rec["body"], title=rec["title"], desired_method=LXMF.LXMessage.DIRECT)
+        router.handle_outbound(msg)
+        inflight[path] = (msg, time.time())
+        log("notice sent: {}".format(rec["title"]))
+
+
 def main():
     while not instance_up():
         time.sleep(5)
@@ -175,6 +207,7 @@ def main():
     with open(os.path.join(APPS_DIR, "lxmf_address.txt"), "w") as f:
         f.write(source.hash.hex() + "\n")
     announced = 0
+    notices = {}  # path -> (message, started)
 
     inflight = {}  # (file, dest) -> (message, started)
 
@@ -193,6 +226,7 @@ def main():
             router.announce(source.hash)
             announced = time.time()
         cfg = load(os.path.join(APPS_DIR, "config.json")) or {}
+        send_notices(router, source, RNS, LXMF, notices)
         for path in sorted(glob.glob(os.path.join(APPS_DIR, "forms_outbox", "*.json"))):
             rec = load(path)
             if not rec:
