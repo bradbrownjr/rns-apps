@@ -21,7 +21,11 @@ VERSION = "1.0"
 PER_PAGE = 8
 
 
-def upload_help():
+def upload_help(ident):
+    """Upload instructions. The messenger address is only shown to a logged-in,
+    registered user, together with a code that ties their messenger to them."""
+    if not ra.handle_for(ident):
+        return [ra.heading("Upload", 2), ra.dim("Register a handle to upload files."), ra.link("Register", "register"), ""]
     addr = ""
     try:
         with open(os.path.join(ra.DATA_DIR, "lxmf_address.txt")) as f:
@@ -30,10 +34,19 @@ def upload_help():
         pass
     if not addr:
         return [ra.dim("Uploads are not open yet.")]
+    name = (ra.config().get("node_name") or "this node") + " files"
+    rec = ra.profile(ident)
+    linked = bool(rec.get("lxmf"))
     return [ra.heading("Upload", 2),
-            "Attach a file to an LXMF message and send it to:", ra.color(addr, ra.C_OK),
-            ra.dim("Register a handle first. Put a description in the message text, and optionally "
-                   "'area: Name' on the first line. A sysop approves each file."), ""]
+            "Send a message with the file attached to:",
+            ra.color(name, ra.C_OK),
+            "`[Open a message to it`lxmf@{}]".format(addr),
+            ra.dim("(or find it in your messenger's announces; address {})".format(addr)),
+            "",
+            "In the message, write your handle ({}) and a description of the file.".format(ra.esc(rec.get("handle", ""))),
+            "Your messenger is linked." if linked else "First time: also include this code so the node can link your messenger to you:",
+            "" if linked else ra.color(ra.link_code(ident), ra.C_OK),
+            ra.dim("A sysop approves each file. Limit 2 MB."), ""]
 
 
 def render():
@@ -88,7 +101,7 @@ def render():
     else:
         if not subs:
             out.append("No file areas yet.")
-        out += [""] + upload_help() + [ra.nav()]
+        out += [""] + upload_help(ra.identity()) + [ra.nav()]
     return "\n".join(out)
 
 

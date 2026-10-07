@@ -59,6 +59,7 @@ def render():
         out.append("Not registered yet.")
     out += [
         ra.dim("Identity: {}".format(ident)),
+        ra.dim("Linked messenger: {}".format(", ".join(a[:12] for a in rec.get("lxmf", [])) or "none (send a file from Files to link one)")),
         "",
         "Handle (required, public)",
         ra.input_field("handle", 20, rec.get("handle", "")),

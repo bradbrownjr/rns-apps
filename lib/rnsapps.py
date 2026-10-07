@@ -220,6 +220,62 @@ def profile(ident):
     return users().get(ident, {}) if ident else {}
 
 
+def _secret():
+    """Server secret for upload link codes, created on first use (chmod 600)."""
+    path = data_path("secret.key")
+    if not os.path.exists(path):
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(os.urandom(32).hex())
+    with open(path) as f:
+        return f.read().strip().encode()
+
+
+def link_code(ident):
+    """Short code (ABCD-EFGH) a registered user puts in an LXMF message so the
+    node can tie that messenger address to their identity. Derived from a
+    server secret, so it can't be computed from the identity alone."""
+    import base64
+    import hashlib
+    import hmac
+    raw = hmac.new(_secret(), b"lxmf-link:" + ident.encode(), hashlib.sha256).digest()
+    text = base64.b32encode(raw)[:8].decode()
+    return "{}-{}".format(text[:4], text[4:])
+
+
+def ident_for_text(text):
+    """Identity whose link code appears in text, or None."""
+    found = re.findall(r"\b([A-Za-z2-7]{4})-?([A-Za-z2-7]{4})\b", text or "")
+    wanted = {"{}-{}".format(a, b).upper() for a, b in found}
+    if not wanted:
+        return None
+    for ident in users():
+        if link_code(ident) in wanted:
+            return ident
+    return None
+
+
+def ident_for_lxmf(address):
+    """Identity that has linked this LXMF address (hex), or None."""
+    for ident, rec in users().items():
+        if address in rec.get("lxmf", []):
+            return ident
+    return None
+
+
+def bind_lxmf(ident, address):
+    """Record an LXMF address on a profile (last three kept)."""
+    with locked("users"):
+        data = users()
+        rec = data.get(ident)
+        if rec is None:
+            return False
+        addrs = [a for a in rec.get("lxmf", []) if a != address] + [address]
+        rec["lxmf"] = addrs[-3:]
+        save_json(data_path("users.json"), data)
+    return True
+
+
 def handle_for(ident):
     return profile(ident).get("handle")
 

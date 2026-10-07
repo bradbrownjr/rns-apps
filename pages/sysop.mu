@@ -169,7 +169,8 @@ def users_view(conn, page, note=""):
         out.append(ra.color(note, ra.C_OK))
     out.append("")
     for ident, rec in users[(page - 1) * USERS_PER_PAGE:page * USERS_PER_PAGE]:
-        extra = " ".join(x for x in (rec.get("callsign"), rec.get("name"), rec.get("location")) if x)
+        extra = " ".join(x for x in (rec.get("callsign"), rec.get("name"), rec.get("location"),
+                                     "msgr " + rec["lxmf"][-1][:8] if rec.get("lxmf") else "") if x)
         state = ra.color(" [muted]", ra.C_WARN) if ident in muted else ""
         out.append("{}{}{}".format(ra.esc(rec.get("handle", "?")), ra.sysop_badge(ident), state)
                    + "  " + (ra.link("unmute", "sysop", a="unmute", i=ident, v="users", p=page) if ident in muted

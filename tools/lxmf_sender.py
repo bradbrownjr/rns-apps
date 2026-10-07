@@ -18,13 +18,14 @@ the pending queue for sysop approval. Config keys (config.json):
 upload_max_bytes (2 MB), upload_daily_bytes (10 MB), upload_pending_max (50),
 clamd_host, clamd_port, clamd_scan (executables|all|off).
 
-Version: 1.2
+Version: 1.3
 Author: Brad Brown Jr (KC1JMH)
 """
 
 import glob
 import json
 import os
+import re
 import socket
 import sys
 import time
@@ -97,7 +98,22 @@ def handle_upload(message, router, source, RNS, LXMF):
     if sender is None or not message.signature_validated:
         log("upload from unverifiable sender {}".format(RNS.prettyhexrep(message.source_hash)))
         return reply("Could not verify your identity. Try again after your client announces.") if sender else None
+    address = message.source_hash.hex()
+    text = message.content_as_string() if message.content else ""
     ident = sender.hash.hex()
+    linked_now = False
+    if ident not in ra.users():
+        ident = ra.ident_for_lxmf(address) or ""
+    if not ident:
+        found = ra.ident_for_text(text)
+        if found:
+            ident, linked_now = found, True
+    if not ident:
+        return reply("I don't know this messenger address. Log in to the BBS, open Files, and include "
+                     "your handle and the link code shown there in your message. You only need the code the first time.")
+    if address not in ra.users().get(ident, {}).get("lxmf", []):
+        ra.bind_lxmf(ident, address)
+        linked_now = True
     files = (message.fields or {}).get(LXMF.FIELD_FILE_ATTACHMENTS) or []
     if not files:
         return reply("No file attached. Attach a file and put a description in the message text.")
@@ -108,7 +124,8 @@ def handle_upload(message, router, source, RNS, LXMF):
     max_bytes = int(cfg.get("upload_max_bytes", 2 * 1024 * 1024))
     daily = int(cfg.get("upload_daily_bytes", 10 * 1024 * 1024))
     pending_max = int(cfg.get("upload_pending_max", 50))
-    note = message.content_as_string().strip()[:300] if message.content else ""
+    note = re.sub(re.escape(ra.link_code(ident)).replace("\\-", "-?"), "", text, flags=re.I).strip()[:300]
+    note = "{}: {}".format(ra.display_name(ident), note) if note else ra.display_name(ident)
     results = []
     for entry in files[:3]:
         try:
@@ -151,6 +168,8 @@ def handle_upload(message, router, source, RNS, LXMF):
                          (stored, bbs.safe_filename(orig), len(data), hashlib.sha256(data).hexdigest(), ident, note, bbs.now(), scan))
         log("queued upload {} from {}".format(stored, ident[:12]))
         results.append("{}: received, waiting for sysop approval.".format(bbs.safe_filename(orig)))
+    if linked_now:
+        results.insert(0, "This messenger address is now linked to your handle; you won't need the code again.")
     reply("\n".join(results) or "Nothing usable in that message.")
 
 
@@ -201,7 +220,7 @@ def main():
         identity = RNS.Identity()
         identity.to_file(id_path)
     router = LXMF.LXMRouter(identity=identity, storagepath=LXMF_DIR)
-    source = router.register_delivery_identity(identity, display_name="rns-apps forms")
+    source = router.register_delivery_identity(identity, display_name=((load(os.path.join(APPS_DIR, "config.json")) or {}).get("node_name") or "rns-apps") + " files")
     log("up, sending as {}".format(RNS.prettyhexrep(source.hash)))
     router.register_delivery_callback(lambda m: handle_upload(m, router, source, RNS, LXMF))
     with open(os.path.join(APPS_DIR, "lxmf_address.txt"), "w") as f:
