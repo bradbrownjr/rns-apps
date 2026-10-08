@@ -16,6 +16,11 @@ login.
 |-----|------|-------------|
 | Menu | `index.mu` | Categorized app menu, the node's home page |
 | Register | `register.mu` | Pick a handle; optional name, callsign, location |
+| MSG | `msg.mu` | Message boards: threads, replies, reply-with-quote, unread markers; sysop lock/pin/move/delete |
+| MAIL | `mail.mu` | Private mail by handle: threaded, quoting, block list, optional LXMF notice |
+| FILES | `files.mu` | Downloads in categories and sub-categories; uploads by LXMF with sysop approval |
+| SEARCH | `search.mu` | Search board threads, posts and files |
+| Sysop | `sysop.mu` | Boards, file areas, pending uploads, users, mutes (sysop identities only) |
 | WALL | `wall.mu` | Community one-liners: post, read, delete your own |
 | HAMQSL | `hamqsl.mu` | Solar data and HF/VHF band conditions (hamqsl.com) |
 | SPACE | `space.mu` | NOAA SWPC space weather reports |
@@ -51,6 +56,27 @@ pages receive their public identity hash. rns-apps uses that to:
 - recognize sysops (identity hashes listed in `config.json`).
 
 Anonymous visitors can read everything; writing needs identification.
+
+## BBS features
+
+- **Handles and sysops.** A visitor registers a handle; boards, mail and uploads
+  need one, reading and downloading don't. Sysops are identity hashes listed in
+  `config.json` `"sysops"` and are never decided by handle (see AGENTS.md).
+- **Boards and mail** live in SQLite (`/data/apps/bbs.db`). Composing is a draft
+  built one paragraph at a time, because micron text boxes are single-line.
+- **Files**: put files in `/data/files/incoming` and import them on the sysop
+  page, or let users upload. Downloads are served by NomadNet itself
+  (`/file/a<area>/<name>`), so they work in NomadNet, MeshChat and Sideband.
+- **Uploads**: a registered user taps "Message me to start an upload" on the
+  Files page; the node sends them an LXMF message and they reply with the file
+  attached. Files are limited to 2 MB (`upload_max_bytes`), 10 MB per user per day
+  and 50 waiting; executables and archives are scanned with ClamAV (`clamd_host`,
+  `clamd_port`, `clamd_scan` = executables | all | off). A sysop approves each
+  file into an area and the uploader gets a notice.
+- **Backups**: `tools/backup.py` runs daily from the LXMF daemon and writes
+  `/data/backups/bbs-*.tar.gz` (a consistent `bbs.db` snapshot, profiles, config,
+  secrets and files; newest 7 kept, `backup_keep`/`backup_dir`). Copy that
+  directory off the machine for protection against disk loss.
 
 ## Running it
 

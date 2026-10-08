@@ -18,7 +18,7 @@ the pending queue for sysop approval. Config keys (config.json):
 upload_max_bytes (2 MB), upload_daily_bytes (10 MB), upload_pending_max (50),
 clamd_host, clamd_port, clamd_scan (executables|all|off).
 
-Version: 1.3
+Version: 1.4
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -27,6 +27,7 @@ import json
 import os
 import re
 import socket
+import subprocess
 import sys
 import time
 
@@ -173,6 +174,24 @@ def handle_upload(message, router, source, RNS, LXMF):
     reply("\n".join(results) or "Nothing usable in that message.")
 
 
+def maybe_backup(cfg):
+    """Daily backup, run as a child process so a big copy never stalls LXMF."""
+    global backup_proc
+    if backup_proc is not None and backup_proc.poll() is None:
+        return
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+        import backup
+        if backup.due(cfg.get("backup_dir", "/data/backups")):
+            log("starting daily backup")
+            backup_proc = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.realpath(__file__)), "backup.py")])
+    except Exception as e:  # never let a backup problem take down the daemon
+        log("backup check failed: {}".format(e))
+
+
+backup_proc = None
+
+
 def send_notices(router, source, RNS, LXMF, inflight):
     """Deliver queued lxmf_notify/*.json notices (upload approved/rejected)."""
     for path in sorted(glob.glob(os.path.join(APPS_DIR, "lxmf_notify", "*.json"))):
@@ -246,6 +265,7 @@ def main():
             announced = time.time()
         cfg = load(os.path.join(APPS_DIR, "config.json")) or {}
         send_notices(router, source, RNS, LXMF, notices)
+        maybe_backup(cfg)
         for path in sorted(glob.glob(os.path.join(APPS_DIR, "forms_outbox", "*.json"))):
             rec = load(path)
             if not rec:

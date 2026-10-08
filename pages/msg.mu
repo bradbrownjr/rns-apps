@@ -120,6 +120,7 @@ def thread_view(conn, ident, thread, page, note=""):
         out += ["", ra.dim("Sysop: ") + "  ".join([
             ra.link("Unlock" if thread["locked"] else "Lock", "msg", t=thread["id"], a="lock"),
             ra.link("Unpin" if thread["sticky"] else "Pin", "msg", t=thread["id"], a="pin"),
+            ra.link("Move", "msg", t=thread["id"], v="move"),
             ra.link("Delete thread", "msg", t=thread["id"], a="delthread")])]
     tail = ["", ra.link("Reply to thread", "msg", v="compose", a="reply", t=thread["id"], r=0)] if can_reply else []
     return out + tail + [ra.nav(*pager, ("Boards", "msg"))]
@@ -200,6 +201,16 @@ def render():
 
     # ---- sysop thread controls
     note = ""
+    if ra.is_sysop(ident) and thread_id and (v == "move" or a == "move"):
+        thread = conn.execute("SELECT * FROM threads WHERE id=?", (thread_id,)).fetchone()
+        target = conn.execute("SELECT * FROM boards WHERE id=?", (ra.int_var("to", 0),)).fetchone() if a == "move" else None
+        if thread and target and target["id"] != thread["board_id"]:
+            conn.execute("UPDATE threads SET board_id=? WHERE id=?", (target["id"], thread_id))
+            note = "Moved to {}.".format(target["name"])
+        elif thread and a != "move":
+            out = [ra.heading("Move thread"), ra.dim(thread["title"][:60]), ""]
+            out += [ra.link("To " + b["name"], "msg", t=thread_id, a="move", to=b["id"]) for b in bbs.boards(conn, ident) if b["id"] != thread["board_id"]]
+            return "\n".join(out + [ra.nav(("Back", "msg"))] if len(out) > 3 else out + [ra.dim("No other boards."), ra.nav()])
     if a == "delthread" and ra.is_sysop(ident) and thread_id and not ra.var("ok"):
         return "\n".join([ra.heading("Delete thread?"), "This removes the whole thread and every reply.", "",
                           ra.link("Yes, delete it", "msg", t=thread_id, a="delthread", ok=1), "  ", ra.link("No", "msg", t=thread_id),
