@@ -10,6 +10,7 @@ Version: 1.0
 Author: Brad Brown Jr (KC1JMH)
 """
 
+import json
 import os
 import sys
 
@@ -21,36 +22,52 @@ VERSION = "1.0"
 PER_PAGE = 8
 
 
-def upload_help(ident):
-    """Upload instructions. The messenger address is only shown to a logged-in,
-    registered user, together with a code that ties their messenger to them."""
+def upload_help(ident, note=""):
+    """Upload instructions for a registered user. The node messages the user
+    first (their messenger can't copy text from a page), and they reply with
+    the file attached."""
     if not ra.handle_for(ident):
         return [ra.heading("Upload", 2), ra.dim("Register a handle to upload files."), ra.link("Register", "register"), ""]
-    addr = ""
-    try:
-        with open(os.path.join(ra.DATA_DIR, "lxmf_address.txt")) as f:
-            addr = f.read().strip()
-    except OSError:
-        pass
-    if not addr:
+    if not os.path.exists(os.path.join(ra.DATA_DIR, "lxmf_address.txt")):
         return [ra.dim("Uploads are not open yet.")]
     name = (ra.config().get("node_name") or "this node") + " files"
     rec = ra.profile(ident)
-    linked = bool(rec.get("lxmf"))
-    return [ra.heading("Upload", 2),
-            "Send a message with the file attached to:",
-            ra.color(name, ra.C_OK),
-            "`[Open a message to it`lxmf@{}]".format(addr),
-            ra.dim("(or find it in your messenger's announces; address {})".format(addr)),
-            "",
-            "In the message, write your handle ({}) and a description of the file.".format(ra.esc(rec.get("handle", ""))),
-            "Your messenger is linked." if linked else "First time: also include this code so the node can link your messenger to you:",
-            "" if linked else ra.color(ra.link_code(ident), ra.C_OK),
-            ra.dim("A sysop approves each file. Limit 2 MB."), ""]
+    out = [ra.heading("Upload", 2)]
+    if note:
+        out += [ra.color(note, ra.C_OK), ""]
+    out += [ra.link("Message me to start an upload", "files", a="invite"),
+            ra.dim("The node sends you a message from '{}'.".format(name)),
+            ra.dim("Reply to it with your file attached and a short"),
+            ra.dim("description. Limit 2 MB. A sysop approves each file."), ""]
+    if not rec.get("lxmf"):
+        out += [ra.dim("No message arriving? Find '{}' under".format(name)), ra.dim("Announces and message it. Include your handle and"),
+                ra.dim("this code the first time: ") + ra.color(ra.link_code(ident), ra.C_OK), ""]
+    return out
+
+
+def invite(ident):
+    """Queue the 'reply with your file' message. One pending invite at a time."""
+    spool = os.path.join(ra.DATA_DIR, "lxmf_notify")
+    for path in (os.listdir(spool) if os.path.isdir(spool) else []):
+        try:
+            with open(os.path.join(spool, path)) as f:
+                rec = json.load(f)
+        except (OSError, ValueError):
+            continue
+        if rec.get("identity") == ident and rec.get("title") == "Upload to {}".format(ra.config().get("node_name", "the BBS")):
+            return "An invite is already on its way. Check your messages."
+    node = ra.config().get("node_name", "the BBS")
+    bbs.notify(ident, "Upload to {}".format(node),
+               "Reply to this message with your file attached, and put a short description in the text. "
+               "Limit 2 MB. A sysop approves each file before it appears in Files.")
+    return "Sent. A message from '{} files' should arrive in a minute; reply to it with your file.".format(node)
 
 
 def render():
     conn = bbs.connect()
+    note = ""
+    if ra.var("a") == "invite" and ra.handle_for(ra.identity()):
+        note = invite(ra.identity())
     area_id, page = ra.int_var("a", 0), ra.int_var("p", 1)
     area = conn.execute("SELECT * FROM file_areas WHERE id=?", (area_id,)).fetchone() if area_id else None
     if area and area["hidden"] and not ra.is_sysop(ra.identity()):
@@ -101,7 +118,7 @@ def render():
     else:
         if not subs:
             out.append("No file areas yet.")
-        out += [""] + upload_help(ra.identity()) + [ra.nav()]
+        out += [""] + upload_help(ra.identity(), note) + [ra.nav()]
     return "\n".join(out)
 
 
