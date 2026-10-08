@@ -101,6 +101,14 @@ def area_view(conn, fid, note=""):
         out.append("{} {}".format(ra.esc(f["title"]), ra.link("remove", "sysop", a="rmfile", v="area", f=fid, x=f["id"])))
     empty = not conn.execute("SELECT 1 FROM files WHERE area_id=?", (fid,)).fetchone() and not conn.execute(
         "SELECT 1 FROM file_areas WHERE parent_id=?", (fid,)).fetchone()
+    banned = {fid} | bbs.area_descendants(conn, fid)
+    parent = r["parent_id"]
+    out += ["", ra.heading("Move", 2), ra.dim("Now under: " + (" / ".join(n for _, n in bbs.area_path(conn, parent)) if parent else "top level"))]
+    if parent:
+        out.append(ra.link("Move to top level", "sysop", a="movearea", v="area", f=fid, to=0))
+    for cand, depth in bbs.area_tree(conn, True):
+        if cand["id"] not in banned and cand["id"] != parent:
+            out.append("  " * depth + ra.link("Move under " + cand["name"], "sysop", a="movearea", v="area", f=fid, to=cand["id"]))
     out += ["", ra.link("Delete area", "sysop", a="delarea", v="areas", f=fid) if empty else ra.dim("Only empty areas (no files or sub-areas) can be deleted.")]
     return out + [ra.nav(("Areas", "sysop"))]
 
@@ -251,6 +259,13 @@ def render():
     elif a == "togglearea" and fid:
         conn.execute("UPDATE file_areas SET hidden=1-hidden WHERE id=?", (fid,))
         note = "Updated."
+    elif a == "movearea" and fid:
+        to = ra.int_var("to", 0)
+        if to and (to == fid or to in bbs.area_descendants(conn, fid) or not conn.execute("SELECT 1 FROM file_areas WHERE id=?", (to,)).fetchone()):
+            note = "Can't move it there."
+        else:
+            conn.execute("UPDATE file_areas SET parent_id=? WHERE id=?", (to or None, fid))
+            note = "Moved."
     elif a == "rmfile" and ra.int_var("x", 0):
         bbs.remove_file(conn, ra.int_var("x", 0))
         note = "File removed."

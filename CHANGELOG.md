@@ -21,6 +21,7 @@ Files area and LXMF uploads (steps 3 and 4 of docs/BBS-PLAN.md).
 - **Upload address hidden from guests**: the Files page shows the messenger name, an `lxmf@` link and address only to a registered user, with instructions to put their handle and description in the message.
 - **Messenger linking**: a per-user link code (HMAC of a server secret, `secret.key`) in the first message ties that LXMF address to the profile (`lxmf` in users.json, last three kept). Unknown addresses without a valid code get a polite refusal. The Register page and sysop user list show the linked address.
 - **Upload by invitation**: MeshChatX can't copy text from a page or open `lxmf@` links, so the Files page now has "Message me to start an upload": the node sends the registered user an LXMF message, and they reply with the file attached. The address is no longer shown. The link code stays as a fallback for messaging the node from Announces.
+- **sysop** 1.2: move a file area under another area (or back to top level); cycles are refused. Files stay put on disk, since they are stored by area id.
 - Image: `files_path` and `file_refresh_interval` set by the entrypoint.
 
 ## 2.0 - 2026-10-06

@@ -393,6 +393,18 @@ def area_path(conn, area_id):
     return path[::-1]
 
 
+def area_descendants(conn, area_id):
+    """Ids of every area below area_id."""
+    found, todo = set(), [area_id]
+    while todo:
+        cur = todo.pop()
+        for r in conn.execute("SELECT id FROM file_areas WHERE parent_id=?", (cur,)):
+            if r["id"] not in found:
+                found.add(r["id"])
+                todo.append(r["id"])
+    return found
+
+
 def area_file_count(conn, area_id):
     """Files in this area and everything below it."""
     ids, todo = [], [area_id]
