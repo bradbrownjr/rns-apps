@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.3 - 2026-11-01
+
+Several devices, one account.
+
+- **register** 1.2: "Link another device" shows a one-time three-word code
+  (10 minutes); entering it on another identified device links that device
+  to the account. Devices list with unlink (confirmed). Guests get
+  client-specific steps for identifying (MeshChat fingerprint icon, NomadNet
+  "Identify when connecting").
+- **rnsapps** 1.7: `identity()` returns the account for a linked device, so
+  handles, mail, stars and sysop rights follow the person;
+  `device_identity()` is the raw one. Links live in `devices.json`. Wrong
+  codes are limited to 20 per hour node-wide.
+- **index** 1.6: guest hint links to "How?" (Register's identify steps).
+- **lxmf_sender** 1.6: uploads from a linked device's messenger count as the account.
+
 ## 2.2 - 2026-11-01
 
 - **nodes** 1.0: shared NomadNet node directory. Registered users add a node

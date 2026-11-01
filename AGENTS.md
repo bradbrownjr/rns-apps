@@ -53,6 +53,10 @@ Identity replaces the BPQ callsign: `remote_identity` is the key,
 only). Most visitors are not hams, so never require a callsign to use an app;
 use `ra.callsign_for(ident)` and ask for one when an app needs it.
 Sysops are identity hashes listed in `/data/apps/config.json`.
+One person may use several devices (several identities): Register links a
+device to an account with a three-word code, stored in `devices.json`.
+`ra.identity()` already returns the account, so pages never handle aliases;
+use `ra.device_identity()` only when the physical device matters.
 
 ---
 

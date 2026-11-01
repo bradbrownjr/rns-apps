@@ -23,7 +23,7 @@ recorded in bbs.db (node_seen) for the NODES directory's "last heard" and
 "recently heard" views. Writes are batched once a minute; entries not heard
 for 30 days are pruned.
 
-Version: 1.5
+Version: 1.6
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -106,7 +106,7 @@ def handle_upload(message, router, source, RNS, LXMF):
         return reply("Could not verify your identity. Try again after your client announces.") if sender else None
     address = message.source_hash.hex()
     text = message.content_as_string() if message.content else ""
-    ident = sender.hash.hex()
+    ident = ra.canonical(sender.hash.hex())
     linked_now = False
     if ident not in ra.users():
         ident = ra.ident_for_lxmf(address) or ""

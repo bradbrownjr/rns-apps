@@ -9,7 +9,7 @@ micron. The page gets no stdin, and its environment holds only PATH plus:
     field_<name>      submitted form fields
     var_<name>        link variables
 
-Version: 1.6
+Version: 1.7
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -27,7 +27,7 @@ import urllib.request
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = "1.6"
+VERSION = "1.7"
 
 # NomadNet passes no environment beyond PATH, so these defaults are what the
 # container uses. The env overrides exist for running pages locally.
@@ -50,10 +50,17 @@ C_OK = "8d8"
 
 # ---------------------------------------------------------------- request ---
 
-def identity():
-    """Visitor's identity hash (hex), or None if they did not identify."""
+def device_identity():
+    """The identity this device signed in with (hex), or None."""
     value = os.environ.get("remote_identity", "").strip().lower()
     return value if re.fullmatch(r"[0-9a-f]{32}", value) else None
+
+
+def identity():
+    """Visitor's account identity (hex), or None if they did not identify.
+    A device linked to another account (see link_device) maps to that
+    account, so handles, mail and sysop rights follow the person."""
+    return canonical(device_identity())
 
 
 def var(name, default=""):
@@ -273,6 +280,144 @@ def bind_lxmf(ident, address):
         addrs = [a for a in rec.get("lxmf", []) if a != address] + [address]
         rec["lxmf"] = addrs[-3:]
         save_json(data_path("users.json"), data)
+    return True
+
+
+# ---------------------------------------------------------------- devices ---
+# One person, several devices: each client has its own Reticulum identity.
+# A registered account shows a three-word code; entering it on another
+# identified device records that device as an alias of the account.
+# devices.json: {"aliases": {device: account}, "codes": {code: {...}},
+#                "fails": [epoch, ...]}
+
+LINK_WORDS = """
+acorn amber anchor apple arrow aspen atlas autumn badge bagel bamboo banjo
+barn basil beach beacon bear beaver bell berry birch bison blanket blossom
+boat bonfire border bottle branch bread breeze brick bridge brook bucket
+buffalo button cabin cactus camel camera candle canoe canyon carrot castle
+cedar cello chalk cherry chimney cider circle cliff clock cloud clover coast
+cobalt comet compass copper coral cotton cougar coyote crane crater cricket
+crystal cupcake dagger daisy delta desert diesel dingo dolphin donkey dragon
+eagle easel echo elbow ember engine falcon feather fern ferry fiddle field
+finch flame flint forest fossil fox galaxy garden garlic geyser ginger glacier
+goose granite grape gravel guitar hammer harbor hawk hazel helmet heron hickory
+honey hornet island ivory jacket jaguar jasmine jelly jungle kayak kettle
+kitten koala ladder lagoon lantern lemon lettuce lilac lily lizard lobster
+locket lotus magnet mango maple marble meadow melon meteor mint mitten monkey
+moose mosaic moss mountain muffin mustang nectar needle nickel oak oasis ocean
+olive onion orbit orchid otter owl paddle panda panther parrot peach peanut
+pebble pelican pepper piano pickle pigeon pillow pine planet plum pocket pony
+poppy potato prairie pretzel puffin pumpkin quartz quill rabbit radar radio
+raven reef ribbon river robin rocket saddle salmon sandal satin school shadow
+shell shovel silver sketch sled sparrow spider spruce squash squid stable
+star stone summit sunset swan tablet teapot thistle thunder tiger timber toast
+tomato topaz torch tractor trail trumpet tulip tundra turtle valley velvet
+violin volcano wagon walnut walrus whale wheat whistle willow window winter
+wizard wolf yarrow zebra
+""".split()
+LINK_TTL = 600            # seconds a code stays valid
+LINK_MAX_FAILS = 20       # wrong codes per hour, node-wide, before entry pauses
+
+
+def _devices():
+    data = load_json(data_path("devices.json"), {})
+    data.setdefault("aliases", {})
+    data.setdefault("codes", {})
+    data.setdefault("fails", [])
+    return data
+
+
+def canonical(ident):
+    """Account identity for a device identity (itself unless linked)."""
+    if not ident:
+        return ident
+    return _devices()["aliases"].get(ident, ident)
+
+
+def linked_devices(account):
+    """Device identities linked to this account."""
+    return sorted(d for d, a in _devices()["aliases"].items() if a == account)
+
+
+def normalize_code(text):
+    return "-".join(re.findall(r"[a-z]+", (text or "").lower()))
+
+
+def new_link_code(account):
+    """Create a fresh three-word code for a registered account (replaces any
+    earlier one). Returns (code, expires_epoch)."""
+    import secrets
+    now = time.time()
+    with locked("devices"):
+        data = _devices()
+        data["codes"] = {c: v for c, v in data["codes"].items()
+                         if v["expires"] > now and v["account"] != account}
+        while True:
+            code = "-".join(secrets.choice(LINK_WORDS) for _ in range(3))
+            if code not in data["codes"]:
+                break
+        data["codes"][code] = {"account": account, "expires": now + LINK_TTL}
+        save_json(data_path("devices.json"), data)
+    return code, now + LINK_TTL
+
+
+def pending_link_code(account):
+    """(code, expires) still valid for this account, or (None, 0)."""
+    now = time.time()
+    for code, v in _devices()["codes"].items():
+        if v["account"] == account and v["expires"] > now:
+            return code, v["expires"]
+    return None, 0
+
+
+def cancel_link_code(account):
+    with locked("devices"):
+        data = _devices()
+        data["codes"] = {c: v for c, v in data["codes"].items() if v["account"] != account}
+        save_json(data_path("devices.json"), data)
+
+
+def link_device(device, code_text):
+    """Link this device identity to the account that issued code_text.
+    Returns (ok, message)."""
+    if not device:
+        return False, "Identify first."
+    code = normalize_code(code_text)
+    now = time.time()
+    with locked("devices"):
+        data = _devices()
+        data["fails"] = [t for t in data["fails"] if t > now - 3600]
+        if len(data["fails"]) >= LINK_MAX_FAILS:
+            save_json(data_path("devices.json"), data)
+            return False, "Too many wrong codes recently. Try again in an hour."
+        entry = data["codes"].get(code)
+        if not entry or entry["expires"] <= now:
+            data["fails"].append(now)
+            save_json(data_path("devices.json"), data)
+            return False, "That code is wrong or has expired. Make a new one on your other device."
+        account = entry["account"]
+        if device == account or data["aliases"].get(device) == account:
+            return False, "This device is already part of that account."
+        if device in data["aliases"]:
+            return False, "This device is linked to another account. Unlink it there first."
+        if device in data["aliases"].values():
+            return False, "Other devices are linked to this one. Unlink them first."
+        if profile(device):
+            return False, "This device has its own registration. Remove it below, then link."
+        del data["codes"][code]
+        data["aliases"][device] = account
+        save_json(data_path("devices.json"), data)
+    return True, "Linked. This device now signs in as {}.".format(handle_for(account) or "your account")
+
+
+def unlink_device(account, device):
+    """Remove a device from an account. Returns True if it was linked."""
+    with locked("devices"):
+        data = _devices()
+        if data["aliases"].get(device) != account:
+            return False
+        del data["aliases"][device]
+        save_json(data_path("devices.json"), data)
     return True
 
 

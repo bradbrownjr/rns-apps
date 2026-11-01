@@ -2,7 +2,7 @@
 """
 rns-apps home page: categorized app menu (port of bpq-apps apps.py).
 
-Version: 1.5
+Version: 1.6
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath
 import bbs  # noqa: E402
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.5"
+VERSION = "1.6"
 
 # Left-aligned and pre-indented: centering (`c) would center every line of the
 # block on its own and shear the art.
@@ -49,7 +49,7 @@ def welcome(ident):
         return line + ("\n" + "  ".join(notes) if notes else "")
     if ident:
         return "Welcome! {}\n{} to pick a handle".format(now, ra.link("Register", "register"))
-    return "Welcome, guest. {}\n{}".format(now, ra.dim("Identify to post and register."))
+    return "Welcome, guest. {}\n{} {}".format(now, ra.dim("Identify to post and register."), ra.link("How?", "register"))
 
 
 def render():
