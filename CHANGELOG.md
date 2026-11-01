@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.2 - 2026-11-01
+
+- **nodes** 1.0: shared NomadNet node directory. Registered users add a node
+  (or a specific page on one) under a category; entries link straight to the
+  remote node. Stars are votes and bookmarks at once (sorted by stars, "My
+  stars" list). Authors delete their own entries, sysops any (with confirm).
+  Categories from `config.json` `node_categories`.
+- **lxmf_sender** 1.5: records `nomadnetwork.node` announces in `bbs.db`
+  (`node_seen`, batched each minute, pruned after 30 days) for NODES' "last
+  heard" times and the "Recently heard" list to add from.
+- **bbs** 1.2: DB migration 4 (`nodes`, `node_stars`, `node_seen`).
+
 ## 2.1 - 2026-10-06
 
 Files area and LXMF uploads (steps 3 and 4 of docs/BBS-PLAN.md).

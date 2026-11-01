@@ -10,5 +10,15 @@
     "<32-hex LXMF delivery address>"
   ],
   "qrz_user": "",
-  "qrz_password": ""
+  "qrz_password": "",
+  "node_categories": [
+    "BBS",
+    "Ham radio",
+    "Chat",
+    "News",
+    "Info",
+    "Files",
+    "Personal",
+    "Other"
+  ]
 }

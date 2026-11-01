@@ -9,7 +9,7 @@ Identity (the verified remote_identity hash) is the key for everything;
 handles are display names looked up from users.json at render time, so a
 renamed handle shows everywhere. Sysops are recognized by identity only.
 
-Version: 1.1
+Version: 1.2
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -22,7 +22,7 @@ from contextlib import contextmanager
 
 import rnsapps as ra
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 POST_INTERVAL = 30       # seconds between posts/mails per identity
 MAX_POST = 1500          # characters of the author's own text per post
@@ -82,6 +82,20 @@ MIGRATIONS = [
     """,
     """
     CREATE TABLE prefs (identity TEXT PRIMARY KEY, mail_notify INTEGER DEFAULT 0, files_seen INTEGER DEFAULT 0);
+    """,
+    """
+    CREATE TABLE nodes (
+        id INTEGER PRIMARY KEY, hash TEXT NOT NULL, path TEXT NOT NULL DEFAULT '/page/index.mu',
+        name TEXT NOT NULL, description TEXT DEFAULT '', category TEXT NOT NULL,
+        author TEXT NOT NULL, created INTEGER);
+    CREATE UNIQUE INDEX nodes_addr ON nodes(hash, path);
+    CREATE INDEX nodes_cat ON nodes(category, name);
+    CREATE TABLE node_stars (
+        identity TEXT NOT NULL, node_id INTEGER NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+        created INTEGER, PRIMARY KEY (identity, node_id));
+    CREATE INDEX node_stars_node ON node_stars(node_id);
+    CREATE TABLE node_seen (hash TEXT PRIMARY KEY, name TEXT DEFAULT '', first_seen INTEGER, last_seen INTEGER);
+    CREATE INDEX node_seen_last ON node_seen(last_seen DESC);
     """,
 ]
 

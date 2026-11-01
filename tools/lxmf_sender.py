@@ -18,7 +18,12 @@ the pending queue for sysop approval. Config keys (config.json):
 upload_max_bytes (2 MB), upload_daily_bytes (10 MB), upload_pending_max (50),
 clamd_host, clamd_port, clamd_scan (executables|all|off).
 
-Version: 1.4
+Node announces: NomadNet node announces heard by the shared instance are
+recorded in bbs.db (node_seen) for the NODES directory's "last heard" and
+"recently heard" views. Writes are batched once a minute; entries not heard
+for 30 days are pruned.
+
+Version: 1.5
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -224,6 +229,53 @@ def send_notices(router, source, RNS, LXMF, inflight):
         log("notice sent: {}".format(rec["title"]))
 
 
+class NodeAnnounces:
+    """Collects nomadnetwork.node announces; flush() writes them to bbs.db."""
+    aspect_filter = "nomadnetwork.node"
+    FLUSH = 60
+    KEEP = 30 * 86400
+
+    def __init__(self):
+        self.pending = {}
+        self.flushed = 0
+        self.pruned = 0
+
+    def received_announce(self, destination_hash, announced_identity, app_data):
+        name = ""
+        if app_data:
+            try:
+                name = app_data.decode("utf-8", "replace")
+            except Exception:
+                name = ""
+        name = re.sub(r"[\x00-\x1f\x7f]", "", name).strip()[:60]
+        self.pending[destination_hash.hex()] = (name, int(time.time()))
+
+    def flush(self):
+        if time.time() - self.flushed < self.FLUSH:
+            return
+        self.flushed = time.time()
+        batch, self.pending = self.pending, {}
+        prune = time.time() - self.pruned > 86400
+        if not batch and not prune:
+            return
+        import bbs
+        try:
+            conn = bbs.connect()
+            with bbs.tx(conn):
+                for h, (name, ts) in batch.items():
+                    conn.execute(
+                        "INSERT INTO node_seen (hash, name, first_seen, last_seen) VALUES (?,?,?,?) "
+                        "ON CONFLICT(hash) DO UPDATE SET last_seen=excluded.last_seen, "
+                        "name=CASE WHEN excluded.name<>'' THEN excluded.name ELSE node_seen.name END",
+                        (h, name, ts, ts))
+                if prune:
+                    conn.execute("DELETE FROM node_seen WHERE last_seen < ?", (int(time.time() - self.KEEP),))
+                    self.pruned = time.time()
+            conn.close()
+        except Exception as e:
+            log("node_seen write failed: {}".format(e))
+
+
 def main():
     while not instance_up():
         time.sleep(5)
@@ -231,6 +283,8 @@ def main():
     import RNS
 
     RNS.Reticulum(configdir=RNS_DIR, loglevel=RNS.LOG_ERROR)
+    nodes = NodeAnnounces()
+    RNS.Transport.register_announce_handler(nodes)
     os.makedirs(LXMF_DIR, exist_ok=True)
     id_path = os.path.join(LXMF_DIR, "identity")
     if os.path.exists(id_path):
@@ -266,6 +320,7 @@ def main():
         cfg = load(os.path.join(APPS_DIR, "config.json")) or {}
         send_notices(router, source, RNS, LXMF, notices)
         maybe_backup(cfg)
+        nodes.flush()
         for path in sorted(glob.glob(os.path.join(APPS_DIR, "forms_outbox", "*.json"))):
             rec = load(path)
             if not rec:

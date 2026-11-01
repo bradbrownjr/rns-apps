@@ -37,6 +37,7 @@ login.
 | PREDICT | `predict.mu` | HF band and hour estimates between any two places, from live solar data |
 | GOPHER | `gopher.mu` | Gopher browser: menus, text files, search, bookmarks (public hosts only) |
 | FORMS | `forms.mu` | ICS-213, radiogram, net check-in, SKYWARN strips and more, filled one field per page; saved on the node and delivered over LXMF |
+| NODES | `nodes.mu` | Shared directory of NomadNet nodes and pages: categories, stars, last heard, add from recently heard announces |
 | WWW | `www.mu` | Text web browser: URLs or search words, followable links, public hosts only |
 | About | `about.mu` | Node info |
 

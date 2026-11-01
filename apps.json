@@ -83,6 +83,11 @@
     ],
     "Browsers": [
       {
+        "name": "NODES",
+        "description": "Node directory",
+        "page": "nodes"
+      },
+      {
         "name": "NEWS",
         "description": "News feeds",
         "page": "news"
