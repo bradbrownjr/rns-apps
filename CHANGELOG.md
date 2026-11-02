@@ -2,6 +2,8 @@
 
 ## 2.3.1 - 2026-11-02
 
+- **register** 1.4: accurate NomadNet steps (save node with Ctrl+S, Saved
+  Nodes via Ctrl+L, Node Info via Ctrl+E, reconnect with Ctrl+W).
 - **register** 1.3: identify steps for MeshChatX (fingerprint icon toggles a
   persistent "Identify when connecting" for the node).
 

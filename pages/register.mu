@@ -11,7 +11,7 @@ only. Apps that need a callsign ask for one when it is missing.
 Several devices can share one account: the account shows a three-word link
 code, and entering it on another identified device links that device.
 
-Version: 1.3
+Version: 1.4
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -23,7 +23,7 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.3"
+VERSION = "1.4"
 
 
 def not_identified():
@@ -43,8 +43,12 @@ def not_identified():
         "this node. Not available in private browsing.",
         "",
         ra.bold("NomadNet"),
-        "Network > Known Nodes > this node > Node Info: tick",
-        "Identify when connecting. Then reload this page.",
+        "1. Ctrl+S on this page, Save (adds it to Known Nodes).",
+        "2. Ctrl+L in the left pane to show Saved Nodes.",
+        "3. Select this node, Ctrl+E for Node Info.",
+        "4. Tick Identify when connecting, then Save.",
+        "5. Ctrl+W to disconnect, then open the node again",
+        "   (a plain reload stays anonymous).",
         "",
         ra.dim("Identifying shares your public identity hash with this node."),
         ra.dim("Nothing else is sent."),
