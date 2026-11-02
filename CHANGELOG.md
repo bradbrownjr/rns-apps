@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.1 - 2026-11-02
+
+- **register** 1.3: identify steps for MeshChatX (fingerprint icon toggles a
+  persistent "Identify when connecting" for the node).
+
 ## 2.3 - 2026-11-01
 
 Several devices, one account.

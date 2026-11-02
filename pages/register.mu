@@ -11,7 +11,7 @@ only. Apps that need a callsign ask for one when it is missing.
 Several devices can share one account: the account shows a three-word link
 code, and entering it on another identified device links that device.
 
-Version: 1.2
+Version: 1.3
 Author: Brad Brown Jr (KC1JMH)
 """
 
@@ -23,7 +23,7 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "lib"))
 import rnsapps as ra  # noqa: E402
 
-VERSION = "1.2"
+VERSION = "1.3"
 
 
 def not_identified():
@@ -36,6 +36,11 @@ def not_identified():
         "With this node open, tap the identify (fingerprint) icon in",
         "the bar beside the node name, confirm, and the page reloads.",
         "Do it each time you open the node.",
+        "",
+        ra.bold("MeshChatX"),
+        "With this node open, tap the fingerprint icon (Identify when",
+        "connecting) and confirm; it turns highlighted and stays on for",
+        "this node. Not available in private browsing.",
         "",
         ra.bold("NomadNet"),
         "Network > Known Nodes > this node > Node Info: tick",
